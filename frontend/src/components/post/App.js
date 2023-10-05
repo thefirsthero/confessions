@@ -4,8 +4,36 @@ import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
+import axios from 'axios'; // Import axios
 
 function App() {
+  const [confession, setConfession] = useState('');
+  const [city, setCity] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Define the API endpoint URL based on environment
+    const apiUrl = process.env.NODE_ENV === 'development'
+      ? 'http://127.0.0.1:8000/addConfession'
+      : '/production-api-url'; // Replace with your production API URL
+
+    try {
+      const response = await axios.post(apiUrl, {
+        confession,
+        city,
+      });
+      
+      // Handle success, reset form, display a message, etc.
+      console.log('Submission successful', response);
+      setConfession('');
+      setCity('');
+    } catch (error) {
+      // Handle errors, display error message, etc.
+      console.error('Error submitting form', error);
+    }
+  };
+
   return (
     <div className="App">
       <header className="App-header">
