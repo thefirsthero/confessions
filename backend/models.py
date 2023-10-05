@@ -4,4 +4,4 @@ class User(BaseModel):
     id: str
     name: str
     lastName: str
-    born: int 
+    birthYear: int 

@@ -2,59 +2,57 @@ from connection import db
 from fastapi import FastAPI, HTTPException
 from models import User
 
-# llamamos a la coleccion users de la db(instancia de firestore)
+# We access the 'users' collection in the database (Firestore instance)
 users = db.collection(u'users')
 
-# creamos una instancia de FastAPI para tener acceso a las rutas 
+# Create an instance of FastAPI to handle routes
 app = FastAPI()
 
-# definimos el comportamiento de la ruta http://127.0.0.1:8000/ con metodo GET
+# Define the behavior for the http://127.0.0.1:8000/ route with the GET method
 @app.get("/")
 async def root():
-    # con users.get() que pertenece a firebase, traemos todos los usuarios de la lista
+    # Using users.get(), which belongs to Firebase, we retrieve all users from the list
     usersRef = users.get()
-    # creamo un diccionario para retornarlo como json
+    # Create a dictionary to return as JSON
     usersJson = {}
-    # recorremos la lista de usuarios
+    # Iterate through the list of users
     for user in usersRef:
-        # agregamos cada usuario recuperado al diccionario
+        # Add each retrieved user to the dictionary
         usersJson[user.id] = user.to_dict()
-    # Retornamos el diccionario
+    # Return the dictionary
     return usersJson
 
-# definimos el comportamiento de la ruta http://127.0.0.1:8000/addUser con metodo POST
+# Define the behavior for the http://127.0.0.1:8000/addUser route with the POST method
 @app.post("/addUser")
-async def addUser(user: User): #pasamos por parametro el modelo de usuario {name, lastName, born}
-    # creamos una instancia de la lista de usuarios y añadimos el id como llave del diccionario
+async def addUser(user: User): # We pass the user model {name, lastName, born} as a parameter
+    # Create an instance of the user list and add the id as the dictionary key
     userAdd = users.document(f'{user.id}') 
-    # agregamos los parametros internos del diccionario y enviamos los cambios
+    # Add the internal parameters of the dictionary and send the changes
     userAdd.set({
-        # a la izquierda vemos el nombre del campo en la base de datos
-        u'nombre': user.name, # a la derecha vemos el dato que le pasamos por parametro del POST
-        u'apellido': user.lastName,
-        u'nacimiento': user.born
+        # On the left, we see the field name in the database
+        u'name': user.name, # On the right, we see the data passed as a parameter in the POST request
+        u'surname': user.lastName,
+        u'birthYear': user.birthYear
     })
-    return {'status' : 200} #retornamos una mensaje de exito
+    return {'status' : 200} # Return a success message
 
-
-
-# definimos el comportamiento de la ruta http://127.0.0.1:8000/delUser con metodo DELETE
+# Define the behavior for the http://127.0.0.1:8000/delUser route with the DELETE method
 @app.delete("/delUser")
-async def delUser(id): #pasamos por parametro id de usuario 
-    # se elimina usuario en coleccion que posea id
-    userRef=db.collection(u'users').document(id)
-    user= userRef.get()
+async def delUser(id): # We pass the user's id as a parameter
+    # Delete the user in the collection with the provided id
+    userRef = db.collection(u'users').document(id)
+    user = userRef.get()
     if user.exists:        
         users.document(f'{id}').delete()      
     else:
-        raise HTTPException(status_code=404, detail="User not found") # levantamos excepcion en caso de no existir user con id provisto 
+        raise HTTPException(status_code=404, detail="User not found") # Raise an exception in case the user with the provided id doesn't exist
         
-    return {'status' : 200} #retornamos una mensaje de exito
+    return {'status' : 200} # Return a success message
 
 @app.put("/modName")
 async def modUser(id, name): 
     userMod = users.document(id)
     userMod.set({
-        u'nombre': name
+        u'name': name
     })
-    return {'status' : 200} 
+    return {'status' : 200}
