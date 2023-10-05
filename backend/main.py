@@ -1,12 +1,22 @@
 from connection import db
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from models import Confession
-
-# We access the 'users' collection in the database (Firestore instance)
-confessions = db.collection(u'confessions')
 
 # Create an instance of FastAPI to handle routes
 app = FastAPI()
+
+# Configure CORS to allow requests from your React app's origin
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],  # Add your React app's origin(s) here
+    allow_methods=["*"],  # Allow all methods (GET, POST, etc.)
+    allow_headers=["*"],  # Allow all headers
+)
+
+
+# We access the 'users' collection in the database (Firestore instance)
+confessions = db.collection(u'confessions')
 
 # Define the behavior for the http://127.0.0.1:8000/ route with the GET method
 @app.get("/")
@@ -22,15 +32,12 @@ async def root():
     # Return the dictionary
     return confessionsJson
 
-# Define the behavior for the http://127.0.0.1:8000/addUser route with the POST method
+# Define the behavior for the http://127.0.0.1:8000/addConfession route with the POST method
 @app.post("/addConfession")
-async def addUser(confession_obj: Confession): # We pass the confession model {confession, location} as a parameter
-    # Create an instance of the confessions list and add the id as the dictionary key
-    confessionAdd = confessions.document(f'{confession_obj.id}') 
-    # Add the internal parameters of the dictionary and send the changes
-    confessionAdd.set({
-        # On the left, we see the field name in the database
-        u'confession': confession_obj.confession, # On the right, we see the data passed as a parameter in the POST request
-        u'location': confession_obj.location
-    })
-    return {'status' : 200} # Return a success message
+async def addConfession(confession_obj: Confession): 
+    try:
+        # Create a new Confession document in Firestore
+        new_confession = confessions.add(confession_obj.dict())
+        return {'status': 200, 'message': 'Confession added successfully', 'id': confession_obj.id}
+    except Exception as e:
+        return {'status': 500, 'error': str(e)}

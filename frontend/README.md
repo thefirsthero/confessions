@@ -2,6 +2,12 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+## Before Anything
+
+Run `npm i` to install node packages.
+Create a .env file in the root frontend directory; define your API URL in the .env file as seen below:
+`REACT_APP_API_URL=http://127.0.0.1:8000`
+
 ## Available Scripts
 
 In the project directory, you can run:

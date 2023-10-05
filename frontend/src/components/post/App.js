@@ -1,3 +1,4 @@
+import React, { useState } from 'react'; // Import useState from React
 import './App.css';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
@@ -13,17 +14,18 @@ function App() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Define the API endpoint URL based on environment
-    const apiUrl = process.env.NODE_ENV === 'development'
-      ? 'http://127.0.0.1:8000/addConfession'
-      : '/production-api-url'; // Replace with your production API URL
+    // Get the base API URL from .env
+    const baseUrl = process.env.REACT_APP_API_URL;
+
+    // Append the specific endpoint
+    const apiUrl = `${baseUrl}/addConfession`;
 
     try {
       const response = await axios.post(apiUrl, {
         confession,
         city,
       });
-      
+
       // Handle success, reset form, display a message, etc.
       console.log('Submission successful', response);
       setConfession('');
@@ -39,18 +41,31 @@ function App() {
       <header className="App-header">
         <Container>
           <h1 className="mb-4">Make Your Confession Below</h1> {/* Title */}
-          <Form>
+
+          <Form onSubmit={handleSubmit}>
             <Form.Group as={Row} controlId="inputConfession" className="mb-3">
               <Form.Label column sm={2}>Enter Confession:</Form.Label>
               <Col sm={10}>
-                <Form.Control as="textarea" rows={5} required />
+                <Form.Control
+                  as="textarea"
+                  rows={5}
+                  value={confession} // Bind to the confession state
+                  onChange={(e) => setConfession(e.target.value)}
+                  required
+                />
               </Col>
             </Form.Group>
 
             <Form.Group as={Row} controlId="city">
               <Form.Label column sm={2}>Enter city name:</Form.Label>
               <Col sm={10}>
-                <Form.Control type="text" placeholder="Location" required />
+                <Form.Control
+                  type="text"
+                  placeholder="Location"
+                  value={city} // Bind to the city state
+                  onChange={(e) => setCity(e.target.value)}
+                  required
+                />
               </Col>
             </Form.Group>
 
