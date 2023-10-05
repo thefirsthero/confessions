@@ -38,6 +38,6 @@ async def addConfession(confession_obj: Confession):
     try:
         # Create a new Confession document in Firestore
         new_confession = confessions.add(confession_obj.dict())
-        return {'status': 200, 'message': 'Confession added successfully', 'id': confession_obj.id}
+        return {'status': 200, 'message': 'Confession added successfully'}
     except Exception as e:
         return {'status': 500, 'error': str(e)}

@@ -7,6 +7,5 @@ from pydantic import BaseModel
 #     birthYear: int 
 
 class Confession(BaseModel):
-    id: str
     confession: str
     location: str

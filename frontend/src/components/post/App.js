@@ -19,8 +19,8 @@ function App() {
 
     // Append the specific endpoint
     const apiUrl = `${baseUrl}/addConfession`;
-
     try {
+
       const response = await axios.post(apiUrl, {
         confession,
         city,
