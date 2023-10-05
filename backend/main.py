@@ -1,4 +1,4 @@
-from backend.connection import db
+from connection import db
 from fastapi import FastAPI, HTTPException
 from models import User
 
