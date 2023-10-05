@@ -22,8 +22,8 @@ function App() {
     try {
 
       const response = await axios.post(apiUrl, {
-        confession,
-        city,
+        confession: String(confession), // Cast to string
+        location: String(city),         // Cast to string
       });
 
       // Handle success, reset form, display a message, etc.
