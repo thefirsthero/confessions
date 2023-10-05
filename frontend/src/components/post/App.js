@@ -1,39 +1,52 @@
-import React, { useState } from 'react'; // Import useState from React
+import React, { useState } from 'react';
 import './App.css';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
-import axios from 'axios'; // Import axios
+import axios from 'axios';
 
 function App() {
   const [confession, setConfession] = useState('');
   const [city, setCity] = useState('');
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadError, setUploadError] = useState(null);
+  const [uploadSuccess, setUploadSuccess] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Clear any previous messages
+    setUploadError(null);
+    setUploadSuccess(null);
 
     // Get the base API URL from .env
     const baseUrl = process.env.REACT_APP_API_URL;
 
     // Append the specific endpoint
     const apiUrl = `${baseUrl}/addConfession`;
+
     try {
+      setIsUploading(true);
 
       const response = await axios.post(apiUrl, {
-        id:-1,
-        confession: String(confession), // Cast to string
-        location: String(city),         // Cast to string
+        id: -1,
+        confession: String(confession),
+        location: String(city),
       });
 
-      // Handle success, reset form, display a message, etc.
+      // Handle success, reset form, and display success message
       console.log('Submission successful', response);
       setConfession('');
       setCity('');
+      setUploadSuccess('Confession added successfully');
     } catch (error) {
-      // Handle errors, display error message, etc.
+      // Handle errors, display error message, and reset uploading state
       console.error('Error submitting form', error);
+      setUploadError('Error adding confession');
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -41,7 +54,7 @@ function App() {
     <div className="App">
       <header className="App-header">
         <Container>
-          <h1 className="mb-4">Make Your Confession Below</h1> {/* Title */}
+          <h1 className="mb-4">Make Your Confession Below</h1>
 
           <Form onSubmit={handleSubmit}>
             <Form.Group as={Row} controlId="inputConfession" className="mb-3">
@@ -50,7 +63,7 @@ function App() {
                 <Form.Control
                   as="textarea"
                   rows={5}
-                  value={confession} // Bind to the confession state
+                  value={confession}
                   onChange={(e) => setConfession(e.target.value)}
                   required
                 />
@@ -63,7 +76,7 @@ function App() {
                 <Form.Control
                   type="text"
                   placeholder="Location"
-                  value={city} // Bind to the city state
+                  value={city}
                   onChange={(e) => setCity(e.target.value)}
                   required
                 />
@@ -72,10 +85,15 @@ function App() {
 
             <Form.Group as={Row} className="mb-3">
               <Col sm={{ span: 10, offset: 2 }}>
-                <Button type="submit" variant="primary">Confess</Button>
+                <Button type="submit" variant="primary" disabled={isUploading}>
+                  {isUploading ? 'Uploading...' : 'Confess'}
+                </Button>
               </Col>
             </Form.Group>
           </Form>
+
+          {uploadError && <p className="text-danger">{uploadError}</p>}
+          {uploadSuccess && <p className="text-success">{uploadSuccess}</p>}
         </Container>
       </header>
     </div>
