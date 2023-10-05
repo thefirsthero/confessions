@@ -1,28 +1,38 @@
 import './App.css';
+import Form from 'react-bootstrap/Form';
+import Button from 'react-bootstrap/Button';
+import Container from 'react-bootstrap/Container';
+import Row from 'react-bootstrap/Row';
+import Col from 'react-bootstrap/Col';
 
 function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <form>
-          <div class="form-group row">
-            <label for="inputConfession" class="col-sm-2 col-form-label">Enter Confession:</label>
-            <div class="col-sm-10">
-              <textarea class="form-control" id="inputConfession" rows="5" required></textarea>
-            </div>
-          </div>
-          <div class="form-group row">
-            <label for="city" class="col-sm-2 col-form-label">Enter city name:</label>
-            <div class="col-sm-10">
-              <input type="text" class="form-control" id="city" placeholder="Location" required />
-            </div>
-          </div>
-          <div class="form-group row">
-            <div class="col-sm-10">
-              <button type="submit" class="btn btn-primary">Confess</button>
-            </div>
-          </div>
-        </form>
+        <Container>
+          <h1 className="mb-4">Make Your Confession Below</h1> {/* Title */}
+          <Form>
+            <Form.Group as={Row} controlId="inputConfession" className="mb-3">
+              <Form.Label column sm={2}>Enter Confession:</Form.Label>
+              <Col sm={10}>
+                <Form.Control as="textarea" rows={5} required />
+              </Col>
+            </Form.Group>
+
+            <Form.Group as={Row} controlId="city">
+              <Form.Label column sm={2}>Enter city name:</Form.Label>
+              <Col sm={10}>
+                <Form.Control type="text" placeholder="Location" required />
+              </Col>
+            </Form.Group>
+
+            <Form.Group as={Row} className="mb-3">
+              <Col sm={{ span: 10, offset: 2 }}>
+                <Button type="submit" variant="primary">Confess</Button>
+              </Col>
+            </Form.Group>
+          </Form>
+        </Container>
       </header>
     </div>
   );
