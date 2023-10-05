@@ -22,6 +22,7 @@ function App() {
     try {
 
       const response = await axios.post(apiUrl, {
+        id:-1,
         confession: String(confession), // Cast to string
         location: String(city),         // Cast to string
       });

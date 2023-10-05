@@ -14,7 +14,6 @@ app.add_middleware(
     allow_headers=["*"],  # Allow all headers
 )
 
-
 # We access the 'users' collection in the database (Firestore instance)
 confessions = db.collection(u'confessions')
 
@@ -36,6 +35,12 @@ async def root():
 @app.post("/addConfession")
 async def addConfession(confession_obj: Confession): 
     try:
+        # Get the count of existing documents in the 'confessions' collection
+        confessions_count = len(list(confessions.stream()))
+        
+        # Set the 'id' field of the new document to the count + 1
+        confession_obj.id = str(confessions_count + 1)
+        
         # Create a new Confession document in Firestore
         new_confession = confessions.add(confession_obj.dict())
         return {'status': 200, 'message': 'Confession added successfully'}
