@@ -2,9 +2,13 @@ from connection import db
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from models import Confession
+from os import environ as env
 
 # Create an instance of FastAPI to handle routes
 app = FastAPI()
+
+# Get allowed servers from env file
+react_app_origin = env['MY_VARIABLE']
 
 # Configure CORS to allow requests from your React app's origin
 app.add_middleware(
