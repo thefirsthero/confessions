@@ -13,7 +13,7 @@ react_app_origin = env['MY_VARIABLE']
 # Configure CORS to allow requests from your React app's origin
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Add your React app's origin(s) here
+    allow_origins=[react_app_origin],  # Add your React app's origin(s) here
     allow_methods=["*"],  # Allow all methods (GET, POST, etc.)
     allow_headers=["*"],  # Allow all headers
 )
