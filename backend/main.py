@@ -7,16 +7,17 @@ from os import environ as env
 # Create an instance of FastAPI to handle routes
 app = FastAPI()
 
-# Get allowed servers from env file
-react_app_origin = env['MY_VARIABLE']
+'''The below section allows specific ip addresses to make requests'''
+# # Get allowed servers from env file
+# react_app_origin = env['MY_VARIABLE']
 
-# Configure CORS to allow requests from your React app's origin
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[react_app_origin],  # Add your React app's origin(s) here
-    allow_methods=["*"],  # Allow all methods (GET, POST, etc.)
-    allow_headers=["*"],  # Allow all headers
-)
+# # Configure CORS to allow requests from your React app's origin
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=[react_app_origin],  # Add your React app's origin(s) here
+#     allow_methods=["*"],  # Allow all methods (GET, POST, etc.)
+#     allow_headers=["*"],  # Allow all headers
+# )
 
 # We access the 'users' collection in the database (Firestore instance)
 confessions = db.collection(u'confessions')

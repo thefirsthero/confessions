@@ -40,13 +40,17 @@ uvicorn main:app --reload
 ```
 
 # OR
-Use Docker:
+### Use Docker (Testing):
 
 Run: `docker compose -f docker-compose.development.yaml up --build` to build and run app in development environment (1st time)
 or use `docker compose -f docker-compose.development.yaml` to run if already built
 
 NB: There is a docket cheatsheet in the root `backend` directory
 NB: Run: `docker compose -f docker-compose.development.yaml up --build -d` to build and run production app in detached mode (1st time)
+
+### To Build Docker Image and Push to Dockerhub (Deployment):
+Run `docker build -t thefirsthero/confessions-fast-api-server .` (build)
+Run `docker push thefirsthero/confessions-fast-api-server` (push)
 
 ## End-points
 
