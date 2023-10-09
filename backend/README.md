@@ -30,6 +30,15 @@ With this, you can now run your REST API using the command 🖥
 ```
 uvicorn main:app --reload 
 ```
+
+# OR
+Use Docker:
+
+Run: `docker compuse up --build` to build and run app (1st time)
+or use `docker compose up` to run if already built
+
+NB: There is a docket cheatsheet in the root `backend` directory
+
 ## End-points
 
 The URL http://127.0.0.1:8000/docs will render the interactive documentation of FastAPI, where you can test the endpoints you create, as well as the ones already added by default.
