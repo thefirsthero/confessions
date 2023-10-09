@@ -14,6 +14,14 @@ git clone https://github.com/rtobart/firebase_fastAPI.git
 pip install -r requirement.txt
 ```
 
+### Then setup .env files:
+These files will host the allowed react app servers' ip addresses for each environment.
+
+They will look like:
+```
+MY_VARIABLE=http://localhost:3000
+```
+
 ### To use this REST API, you need to download Firebase credentials from your Firebase console 🤓
 To do this process:
 
@@ -34,10 +42,11 @@ uvicorn main:app --reload
 # OR
 Use Docker:
 
-Run: `docker compuse up --build` to build and run app (1st time)
-or use `docker compose up` to run if already built
+Run: `docker compose -f docker-compose.development.yaml up --build` to build and run app in development environment (1st time)
+or use `docker compose -f docker-compose.development.yaml` to run if already built
 
 NB: There is a docket cheatsheet in the root `backend` directory
+NB: Run: `docker compose -f docker-compose.development.yaml up --build -d` to build and run production app in detached mode (1st time)
 
 ## End-points
 
