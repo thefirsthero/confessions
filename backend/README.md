@@ -19,7 +19,7 @@ These files will host the allowed react app servers' ip addresses for each envir
 
 They will look like:
 ```
-MY_VARIABLE=http://localhost:3000
+MY_VARIABLE_1=http://localhost:3000
 ```
 
 ### To use this REST API, you need to download Firebase credentials from your Firebase console 🤓
@@ -46,7 +46,7 @@ Run: `docker compose -f docker-compose.development.yaml up --build` to build and
 or use `docker compose -f docker-compose.development.yaml` to run if already built
 
 NB: There is a docket cheatsheet in the root `backend` directory
-NB: Run: `docker compose -f docker-compose.development.yaml up --build -d` to build and run production app in detached mode (1st time)
+NB: Run: `docker compose -f docker-compose.production.yaml up --build -d` to build and run production app in detached mode (1st time)
 
 ### To Build Docker Image and Push to Dockerhub (Deployment):
 Run `docker build -t thefirsthero/confessions-fast-api-server .` (build)
