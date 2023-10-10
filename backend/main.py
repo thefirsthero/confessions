@@ -1,8 +1,15 @@
+import datetime
+import time
+import uuid
 from connection import db
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, File, UploadFile
+from typing import List
+import shutil
 from fastapi.middleware.cors import CORSMiddleware
 from models import Confession
 from os import environ as env
+from os import remove
+from firebase_admin import firestore
 
 # Create an instance of FastAPI to handle routes
 app = FastAPI()
@@ -54,5 +61,48 @@ async def addConfession(confession_obj: Confession):
         # Create a new Confession document in Firestore
         new_confession = confessions.add(confession_obj.dict())
         return {'status': 200, 'message': 'Confession added successfully'}
+    except Exception as e:
+        return {'status': 500, 'error': str(e)}
+
+from firebase_admin import storage
+
+@app.post("/uploadImages")
+async def upload_images(images: List[UploadFile]):
+    try:
+        # Initialize an empty list to store image URLs
+        image_urls = []
+
+        # Get the current timestamp as a string (for uniqueness)
+        current_time = str(int(time.time()))
+
+        # Iterate through the uploaded image files
+        for index, image in enumerate(images):
+            # Generate a unique filename with an incremental number and timestamp
+            filename = f"{current_time}_{index}_{str(uuid.uuid4())}"
+
+            # Upload the image to Firebase Storage
+            bucket = storage.bucket()
+            blob = bucket.blob(filename)
+            blob.upload_from_file(image.file, content_type=image.content_type)
+
+            # Get the download URL for the uploaded image
+            image_url = blob.generate_signed_url(
+                expiration=datetime.timedelta(days=1),
+                method="GET"
+            )
+
+            # Save the image URL to Firestore
+            image_doc = {
+                'url': image_url,
+                'filename': filename  # Optional: You can also save the filename
+            }
+
+            # Add the image document to the 'images' collection in Firestore
+            db.collection('images').add(image_doc)
+
+            # Append the image URL to the list
+            image_urls.append(image_url)
+
+        return {'status': 200, 'message': 'Images uploaded successfully', 'image_urls': image_urls}
     except Exception as e:
         return {'status': 500, 'error': str(e)}
