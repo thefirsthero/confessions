@@ -58,7 +58,9 @@ function App() {
 
           <Form onSubmit={handleSubmit}>
             <Form.Group as={Row} controlId="inputConfession" className="mb-3">
-              <Form.Label column sm={2}>Enter Confession:</Form.Label>
+              <Form.Label column sm={2}>
+                Enter Confession:
+              </Form.Label>
               <Col sm={10}>
                 <Form.Control
                   as="textarea"
@@ -71,7 +73,9 @@ function App() {
             </Form.Group>
 
             <Form.Group as={Row} controlId="city">
-              <Form.Label column sm={2}>Enter city name:</Form.Label>
+              <Form.Label column sm={2}>
+                Enter city name:
+              </Form.Label>
               <Col sm={10}>
                 <Form.Control
                   type="text"
@@ -83,13 +87,14 @@ function App() {
               </Col>
             </Form.Group>
 
-            <Form.Group as={Row} className="mb-3">
+            <Row className="mb-3">
               <Col sm={{ span: 10, offset: 2 }}>
-                <Button type="submit" variant="primary" disabled={isUploading}>
-                  {isUploading ? 'Uploading...' : 'Confess'}
-                </Button>
+              <Button type="submit" variant="primary" disabled={isUploading} className="confess-button">
+  {isUploading ? 'Uploading...' : 'Confess'}
+</Button>
+
               </Col>
-            </Form.Group>
+            </Row>
           </Form>
 
           {uploadError && <p className="text-danger">{uploadError}</p>}
