@@ -10,7 +10,7 @@ function AppNavbar() {
       <Container>
         <Navbar.Brand href="#home">Welcome to Confessions</Navbar.Brand>
         <Navbar.Toggle aria-controls="responsive-navbar-nav" />
-        <Navbar.Collapse id="responsive-navbar-nav">
+        <Navbar.Collapse id="responsive-navbar-nav" className="justify-content-end">
           <Nav className="ml-auto">
             <Nav.Item>
               <NavLink to="/make-confession" className="nav-link">
