@@ -11,6 +11,8 @@ function App() {
       <Routes>
         <Route path="/make-confession" element={<Post />} />
         <Route path="/feed" element={<Feed />} />
+        {/* Define the root ("/") route to use the Feed component */}
+        <Route path="/" element={<Feed />} />
       </Routes>
     </div>
   );
