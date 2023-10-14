@@ -48,11 +48,11 @@ function Post() {
         } finally {
             setIsUploading(false);
         }
-    };
+    }
 
     return (
-        <div className="App">
-            <header className="App-header">
+        <div className="Post">
+            <header className="Post-header">
                 <Container>
                     <h1 className="mb-4">Make Your Confession Below</h1>
 
@@ -92,7 +92,6 @@ function Post() {
                                 <Button type="submit" variant="primary" disabled={isUploading} className="confess-button">
                                     {isUploading ? 'Uploading...' : 'Confess'}
                                 </Button>
-
                             </Col>
                         </Row>
                     </Form>
@@ -103,7 +102,6 @@ function Post() {
             </header>
         </div>
     );
-
 }
 
 export default Post;

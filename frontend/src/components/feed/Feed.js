@@ -32,8 +32,8 @@ function Feed() {
     }, []);
 
     return (
-        <div className="App">
-            <header className="App-header">
+        <div className="Feed">
+            <header className="Feed-header">
                 <Container>
                     <h1 className="feed-header mb-4">Confessions Feed</h1>
 
