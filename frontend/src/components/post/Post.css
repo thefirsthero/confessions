@@ -7,17 +7,6 @@
   text-align: center;
 }
 
-.Post-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .Post-logo {
-      animation: Post-logo-spin infinite 20s linear;
-  }
-}
-
 .Post-header {
   background-color: #282c34;
   min-height: 100vh;
@@ -27,17 +16,4 @@
   justify-content: center;
   font-size: calc(10px + 2vmin);
   color: white;
-}
-
-.Post-link {
-  color: #61dafb;
-}
-
-@keyframes Post-logo-spin {
-  from {
-      transform: rotate(0deg);
-  }
-  to {
-      transform: rotate(360deg);
-  }
 }
