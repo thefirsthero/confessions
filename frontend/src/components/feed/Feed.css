@@ -1,0 +1,38 @@
+/* Add styles for the Feed component */
+.feed-header {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+  }
+
+.loading-message {
+    font-size: 1.5rem;
+    color: #777; /* Text color */
+}
+
+.no-confessions-message {
+    font-size: 1.5rem;
+    color: #777; /* Text color */
+}
+
+/* Styling for the Card component */
+.card {
+    border: 1px solid #ccc; /* Border color */
+    border-radius: 10px; /* Rounded corners */
+    box-shadow: 5px 5px 15px 0 rgba(0, 0, 0, 0.2); /* Box shadow */
+    margin-bottom: 20px; /* Margin between cards */
+}
+
+.card-title {
+    font-size: 1.5rem; /* Title font size */
+    color: #007bff; /* Title color */
+}
+
+.card-text {
+    font-size: 1rem; /* Text font size */
+    color: #333; /* Text color */
+}
+
+.card-subtitle {
+    font-size: 1rem; /* Subtitle font size */
+    color: #555; /* Subtitle color */
+}

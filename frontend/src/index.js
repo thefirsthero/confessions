@@ -1,20 +1,21 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
-import App from './components/post/App';
+import App from './App';
 import reportWebVitals from './reportWebVitals';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import AppNavbar from './components/common/navbar'; // Import the Navbar component
+import { BrowserRouter as Router } from 'react-router-dom'; // Import BrowserRouter
 
+// Create a root element
 const root = ReactDOM.createRoot(document.getElementById('root'));
+
+// Render the app inside the root element
 root.render(
-  <React.StrictMode>
-    <AppNavbar /> {/* Include the Navbar component */}
-    <App />
-  </React.StrictMode>
+  <Router>
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>
+  </Router>
 );
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
 reportWebVitals();
