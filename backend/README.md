@@ -68,3 +68,7 @@ For more information, please check the official documentation of these technolog
 
 - [Firebase documentation](https://firebase.google.com/docs?authuser=0&hl=es)
 - [FastAPI documentation](https://fastapi.tiangolo.com/tutorial/)
+
+### Docker Tutorial Videos that aided in this Project:
+
+Found in`./docker_tutorial`
