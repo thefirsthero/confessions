@@ -14,7 +14,7 @@ function AppNavbar() {
   return (
     <Navbar expand="lg" bg="dark" variant="dark" expanded={expanded}>
       <Container>
-        <Navbar.Brand href="#home">Welcome to Confessions</Navbar.Brand>
+        <Navbar.Brand href="#home">Welcome to My Confessions</Navbar.Brand>
         <Navbar.Toggle aria-controls="responsive-navbar-nav" onClick={() => setExpanded(!expanded)} />
         <Navbar.Collapse id="responsive-navbar-nav" className="justify-content-end">
           <Nav className="ml-auto">
