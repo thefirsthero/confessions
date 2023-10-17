@@ -26,10 +26,8 @@ app = FastAPI()
 
 '''The below section allows specific ip addresses to make requests'''
 # Get allowed servers from env file
-# react_app_origin_1 = env['MY_VARIABLE_1']
-# react_app_origin_2 = env['MY_VARIABLE_2']
-react_app_origin_1 = "*"
-react_app_origin_2 = "*"
+react_app_origin_1 = env['MY_VARIABLE_1']
+react_app_origin_2 = env['MY_VARIABLE_2']
 
 # Configure CORS to allow requests from your React app's origin
 origins = [
