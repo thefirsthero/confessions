@@ -1,5 +1,9 @@
 FROM python:3.8.10-slim
 
+# Install system dependencies
+RUN apt-get update \
+  && apt-get -y install tesseract-ocr
+
 WORKDIR /app
 
 COPY . /app

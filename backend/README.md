@@ -1,12 +1,10 @@
-# firebase_fastAPI 🚀
-Before you start, I recommend working with a virtual environment:
+My server for text extraction and cleaning from images for my WhisperConfesssions project
+
+# Before you start
+I recommend working with a virtual environment:
 ```
 python -m venv venv
 .\venv\Scripts\activate
-```
-## REST API with FastAPI (Python) to Firebase Firestore (Google) 🌎
-```
-git clone https://github.com/rtobart/firebase_fastAPI.git
 ```
 
 ### First, install the necessary dependencies 🖥
@@ -56,15 +54,19 @@ Run `docker push thefirsthero/confessions-fast-api-server` (push)
 
 The URL http://127.0.0.1:8000/docs will render the interactive documentation of FastAPI, where you can test the endpoints you create, as well as the ones already added by default.
 
-The URL http://127.0.0.1:8000/addUser allows you to add users using the POST method. The user data structure is defined in the 'models.py' file at the root of the API.
+The URL http://127.0.0.1:8000/ will return a json of all confessions currently present in the confessions collection on the firebase firestore.
 
-The URL http://127.0.0.1:8000/ will return the complete list of registered users.
+The URL http://127.0.0.1:8000/addConfession allows you to post a confession to the confessions collection on the firebase firestore.
 
-The URL http://127.0.0.1:8000/delUser allows you to delete users using the DELETE method. It requires the user's ID to delete.
+The URL http://127.0.0.1:8000/upload-images/  allows you to upload images to the server memory using the POST method.
 
-The URL http://127.0.0.1:8000/modName allows you to modify the user's name. It requires the user's ID.
+The URL http://127.0.0.1:8000/list-images/ will return a complete list of all images currently on the server.
 
-For more information, please check the official documentation of these technologies:
+The URL http://127.0.0.1:8000//process-images/ will run through and process each image uploaded to the server, extracting its text via ocr, cleaning that text and running the text through a profanity filter, and at the end of the processing, return a json file, with the results of the processing.
+
+The URL http://127.0.0.1:8000/delete-images/ allows you to delete all images currently on the server.
+
+The URL http://127.0.0.1:8000/delete-image/{filename} allows you to delete {filename} from the server.
 
 - [Firebase documentation](https://firebase.google.com/docs?authuser=0&hl=es)
 - [FastAPI documentation](https://fastapi.tiangolo.com/tutorial/)
