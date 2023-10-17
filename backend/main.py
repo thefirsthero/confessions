@@ -1,15 +1,25 @@
 import datetime
+import shutil
 import time
 import uuid
 from connection import db
-from fastapi import FastAPI, HTTPException, File, UploadFile
+from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi.responses import FileResponse
+import requests
+import uvicorn
+import os
+import json
 from typing import List
-import shutil
+import imghdr 
+from image_processing import extract_and_reformat_text
+from text_processing import filter_text, clean_and_format_text, extract_series_and_part, split_and_clean_text
+from ocr_functions import extract_text_with_tesseract
 from fastapi.middleware.cors import CORSMiddleware
 from models import Confession
 from os import environ as env
 from os import remove
-from firebase_admin import firestore
+from firebase_admin import storage, firestore
+import tempfile
 
 # Create an instance of FastAPI to handle routes
 app = FastAPI()
@@ -64,45 +74,217 @@ async def addConfession(confession_obj: Confession):
     except Exception as e:
         return {'status': 500, 'error': str(e)}
 
-from firebase_admin import storage
+# Import the necessary modules
+from collections import defaultdict
 
-@app.post("/uploadImages")
+# Create a dictionary to store filenames and their counts
+uploaded_filenames = defaultdict(int)
+
+# API endpoint to upload images
+@app.post("/upload-images/")
 async def upload_images(images: List[UploadFile]):
     try:
         # Initialize an empty list to store image URLs
         image_urls = []
 
-        # Get the current timestamp as a string (for uniqueness)
-        current_time = str(int(time.time()))
-
         # Iterate through the uploaded image files
-        for index, image in enumerate(images):
-            # Generate a unique filename with an incremental number and timestamp
-            filename = f"{current_time}_{index}_{str(uuid.uuid4())}"
+        for image in images:
+            # Check if the file is a valid image type
+            if imghdr.what(image.file) is not None:
+                # Extract the original filename from the uploaded file
+                original_filename = image.filename
 
-            # Upload the image to Firebase Storage
-            bucket = storage.bucket()
-            blob = bucket.blob(filename)
-            blob.upload_from_file(image.file, content_type=image.content_type)
+                # Check if the original filename has been uploaded before
+                if uploaded_filenames[original_filename] >= 1:
+                    raise Exception(f"Image '{original_filename}' has already been uploaded.")
 
-            # Get the download URL for the uploaded image
-            image_url = blob.generate_signed_url(
-                expiration=datetime.timedelta(days=1),
-                method="GET"
-            )
+                # Increment the count for the original filename
+                uploaded_filenames[original_filename] += 1
 
-            # Save the image URL to Firestore
-            image_doc = {
-                'url': image_url,
-                'filename': filename  # Optional: You can also save the filename
-            }
+                # Upload the image to Firebase Storage with its original filename
+                bucket = storage.bucket()
+                blob = bucket.blob(original_filename)
+                blob.upload_from_file(image.file, content_type=image.content_type)
 
-            # Add the image document to the 'images' collection in Firestore
-            db.collection('images').add(image_doc)
+                # Get the download URL for the uploaded image
+                image_url = blob.generate_signed_url(
+                    expiration=datetime.timedelta(days=1),
+                    method="GET"
+                )
 
-            # Append the image URL to the list
-            image_urls.append(image_url)
+                # Save the image URL to Firestore
+                image_doc = {
+                    'url': image_url,
+                    'filename': original_filename
+                }
+
+                # Add the image document to the 'images' collection in Firestore
+                db.collection('images').add(image_doc)
+
+                # Append the image URL to the list
+                image_urls.append(image_url)
+            else:
+                # Raise an exception if the file is not an image
+                raise Exception(f"{image.filename} is not an image file")
 
         return {'status': 200, 'message': 'Images uploaded successfully', 'image_urls': image_urls}
     except Exception as e:
         return {'status': 500, 'error': str(e)}
+
+
+# API endpoint to return the OCR text of the images uploaded
+@app.get("/process-images/")
+async def process_images():
+    try:
+        # Initialize video data as an empty list
+        video_data = []
+
+        # Get a reference to the Firestore collection
+        db = firestore.client()
+        images_ref = db.collection('images')
+
+        # Retrieve all image documents from Firestore
+        images = images_ref.stream()
+
+        # Create a temporary directory for downloading images
+        temp_dir = tempfile.mkdtemp(prefix='image_download_')
+
+        # Process each image in Firestore
+        for image in images:
+            image_data = image.to_dict()
+            if image_data:
+                image_url = image_data.get('url')
+
+                # Generate a unique, short filename
+                image_filename = f"image_{str(uuid.uuid4())}"
+
+                image_local_path = os.path.join(temp_dir, image_filename)
+
+                # Download the image from its original URL
+                original_image_response = requests.get(image_url)
+                if original_image_response.status_code == 200:
+                    with open(image_local_path, "wb") as local_image_file:
+                        local_image_file.write(original_image_response.content)
+
+                # Call the function with the chosen OCR library
+                extracted_text = extract_and_reformat_text(image_local_path, extract_text_with_tesseract)
+
+                # Text processing
+                cleaned_text = filter_text(extracted_text)
+                cleaned_text = clean_and_format_text(cleaned_text)
+                series, part = extract_series_and_part(extracted_text)
+                cleaned_text = split_and_clean_text(cleaned_text)
+
+                # Update the video data and append it
+                video_data.append({
+                    "series": series,
+                    "part": part,
+                    "outro": "Visit www.myconfessions.co.za to anonymously confess",
+                    "path": image_local_path,  # Use the local path of the downloaded image
+                    "text": cleaned_text
+                })
+
+                # Delete the temporary image
+                os.remove(image_local_path)
+
+        # Sort video_data by the 'part' field in ascending order
+        video_data = sorted(video_data, key=lambda x: int(x["part"]))
+
+        # Write video_data to a JSON file
+        video_json_path = os.path.join(temp_dir, 'video.json')
+        with open(video_json_path, 'w', encoding='utf-8') as video_json_file:
+            json.dump(video_data, video_json_file, ensure_ascii=False, indent=4)
+
+        return FileResponse(video_json_path, headers={"Content-Disposition": "attachment; filename=video.json"})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Endpoint to get a JSON list of filenames from the Firestore images collection
+@app.get("/list-images/")
+async def list_images():
+    try:
+        # Get a reference to the Firestore collection
+        db = firestore.client()
+        images_ref = db.collection('images')
+
+        # Retrieve all image documents from Firestore
+        images = images_ref.stream()
+
+        # Extract filenames from Firestore documents
+        filenames = [image.to_dict().get('filename') for image in images]
+
+        return {"files": filenames}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# API endpoint to delete a specific image from Firestore and Storage
+@app.delete("/delete-image/{filename}")
+async def delete_image(filename: str):
+    try:
+        # Get a reference to the Firestore collection
+        db = firestore.client()
+        images_ref = db.collection('images')
+
+        # Query Firestore to find the image with the specified filename
+        query = images_ref.where('filename', '==', filename)
+        results = query.stream()
+
+        # Check if the image with the specified filename exists
+        found = False
+        for image in results:
+            found = True
+            image_data = image.to_dict()
+
+            # Delete the document in Firestore
+            image.reference.delete()
+
+            # Delete the corresponding image in the Firebase Storage bucket
+            bucket = storage.bucket()
+            blob = bucket.blob(filename)
+            blob.delete()
+
+        if found:
+            return {"message": f"Image '{filename}' deleted successfully from Firestore and Storage"}
+        else:
+            return {"message": f"Image '{filename}' not found in the database"}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# API endpoint to delete all images stored on the server
+@app.delete("/delete-images/")
+async def delete_images():
+    try:
+        # Get a reference to the Firestore collection
+        db = firestore.client()
+        images_ref = db.collection('images')
+
+        # Retrieve all image documents from Firestore
+        images = images_ref.stream()
+
+        # Check if the 'images' collection is not empty
+        images_exist = False
+
+        for image in images:
+            images_exist = True
+            image_data = image.to_dict()
+            if image_data:
+                filename = image_data.get('filename')
+
+                # Delete the document in Firestore
+                image.reference.delete()
+
+                # Delete the corresponding object from the Firebase Storage bucket
+                bucket = storage.bucket()
+                blob = bucket.blob(filename)
+                blob.delete()
+
+        if images_exist:
+            return {"message": "All images deleted successfully"}
+        else:
+            return {"message": "No images found to delete"}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
