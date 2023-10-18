@@ -47,8 +47,8 @@ NB: There is a docket cheatsheet in the root `backend` directory
 NB: Run: `docker compose -f docker-compose.production.yaml up --build -d` to build and run production app in detached mode (1st time)
 
 ### To Build Docker Image and Push to Dockerhub (Deployment):
-Run `docker build -t thefirsthero/confessions-fast-api-server .` (build)
-Run `docker push thefirsthero/confessions-fast-api-server` (push)
+Run `docker build -t thefirsthero/confessions-fast-api-server:1.0.0 .` (build)
+Run `docker push thefirsthero/confessions-fast-api-server1.0.0` (push)
 
 ## End-points
 
