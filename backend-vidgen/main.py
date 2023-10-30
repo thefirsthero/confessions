@@ -1,290 +1,65 @@
-import datetime
-import shutil
-import time
-import uuid
-from connection import db
-from fastapi import FastAPI, File, UploadFile, HTTPException
-from fastapi.responses import FileResponse
-import requests
-import uvicorn
+from fastapi import FastAPI
+import subprocess
 import os
-import json
-from typing import List
-import imghdr 
-from image_processing import extract_and_reformat_text
-from text_processing import filter_text, clean_and_format_text, extract_series_and_part, split_and_clean_text
-from ocr_functions import extract_text_with_tesseract
-from fastapi.middleware.cors import CORSMiddleware
-from models import Confession
-from os import environ as env
-from os import remove
-from firebase_admin import storage, firestore
-import tempfile
+import firebase_admin
+from firebase_admin import credentials, firestore
+from fastapi.responses import JSONResponse
+from connection import db
 
-# Create an instance of FastAPI to handle routes
 app = FastAPI()
 
-'''The below section allows specific ip addresses to make requests'''
-# Get allowed servers from env file
-react_app_origin_1 = env['MY_VARIABLE_1']
-react_app_origin_2 = env['MY_VARIABLE_2']
-
-# Configure CORS to allow requests from your React app's origin
-origins = [
-    react_app_origin_1,
-    react_app_origin_2
-]
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins, # Add your React app's origin(s) here
-    allow_methods=["*"],  # Allow all methods (GET, POST, etc.)
-    allow_headers=["*"],  # Allow all headers
-)
-
-# We access the 'users' collection in the database (Firestore instance)
-confessions = db.collection(u'confessions')
-
-# Define the behavior for the http://127.0.0.1:8000/ route with the GET method
-@app.get("/")
-async def root():
-    # Using confessions.get(), which belongs to Firebase, we retrieve all users from the list
-    confessionsRef = confessions.get()
-    # Create a dictionary to return in JSON format
-    confessionsJson = {}
-    # Iterate through the list of confessions
-    for confession in confessionsRef:
-        # Add each retrieved confession to the dictionary
-        confessionsJson[confession.id] = confession.to_dict()
-    # Return the dictionary
-    return confessionsJson
-
-# Define the behavior for the http://127.0.0.1:8000/addConfession route with the POST method
-@app.post("/addConfession")
-async def addConfession(confession_obj: Confession): 
+def run_populate_video_json():
     try:
-        # Get the count of existing documents in the 'confessions' collection
-        confessions_count = len(list(confessions.stream()))
-        
-        # Set the 'id' field of the new document to the count + 1
-        confession_obj.id = str(confessions_count + 1)
-        
-        # Create a new Confession document in Firestore
-        new_confession = confessions.add(confession_obj.dict())
-        return {'status': 200, 'message': 'Confession added successfully'}
-    except Exception as e:
-        return {'status': 500, 'error': str(e)}
+        subprocess.run(["python", "populate_video_json.py"], check=True)
+    except subprocess.CalledProcessError as e:
+        return JSONResponse(content={"error": "Failed to run populate_video_json.py"}, status_code=500)
 
-# Import the necessary modules
-from collections import defaultdict
+    return True
 
-# Create a dictionary to store filenames and their counts
-uploaded_filenames = defaultdict(int)
+def is_video_json_empty():
+    # Check if video.json exists and is not empty
+    if os.path.exists("video.json") and os.path.getsize("video.json") > 0:
+        return False
+    return True
 
-# API endpoint to upload images
-@app.post("/upload-images/")
-async def upload_images(images: List[UploadFile]):
+def generate_videos():
+    # Check if video.json is empty
+    if is_video_json_empty():
+        return JSONResponse(content={"error": "video.json is empty or does not exist"}, status_code=500)
+
     try:
-        # Initialize an empty list to store image URLs
-        image_urls = []
+        subprocess.run(["python", "vidgen.py", "--model", "medium", "--tts", "en-US-ChristopherNeural"], check=True)
+    except subprocess.CalledProcessError as e:
+        return JSONResponse(content={"error": "Failed to generate videos"}, status_code=500)
 
-        # Iterate through the uploaded image files
-        for image in images:
-            # Check if the file is a valid image type
-            if imghdr.what(image.file) is not None:
-                # Extract the original filename from the uploaded file
-                original_filename = image.filename
+    return True
 
-                # Check if the original filename has been uploaded before
-                if uploaded_filenames[original_filename] >= 1:
-                    raise Exception(f"Image '{original_filename}' has already been uploaded.")
+def store_videos_in_firebase():
+    # Get a list of video files in the 'output' directory
+    video_files = [f for f in os.listdir("output") if f.endswith(".mp4")]
 
-                # Increment the count for the original filename
-                uploaded_filenames[original_filename] += 1
+    for video_file in video_files:
+        # Get the video name (removing the file extension)
+        video_name = os.path.splitext(video_file)[0]
 
-                # Upload the image to Firebase Storage with its original filename
-                bucket = storage.bucket()
-                blob = bucket.blob(original_filename)
-                blob.upload_from_file(image.file, content_type=image.content_type)
+        try:
+            # Read the video file as bytes
+            with open(os.path.join("output", video_file), "rb") as video_content:
+                # Upload the video to Firebase using the video name as the document ID
+                db.collection("videos").document(video_name).set({"url": video_name, "content": video_content.read()})
 
-                # Get the download URL for the uploaded image
-                image_url = blob.generate_signed_url(
-                    expiration=datetime.timedelta(days=1),
-                    method="GET"
-                )
+        except Exception as e:
+            return JSONResponse(content={"error": f"Failed to store video '{video_name}' in Firebase"}, status_code=500)
 
-                # Save the image URL to Firestore
-                image_doc = {
-                    'url': image_url,
-                    'filename': original_filename
-                }
+    return True
 
-                # Add the image document to the 'images' collection in Firestore
-                db.collection('images').add(image_doc)
+@app.post("/generate-videos/")
+async def generate_and_store_videos():
+    if run_populate_video_json() and generate_videos() and store_videos_in_firebase():
+        return JSONResponse(content={"message": "Videos generated and stored in Firebase"}, status_code=200)
+    else:
+        return JSONResponse(content={"error": "Failed to run populate_video_json.py, generate videos, or store videos"}, status_code=500)
 
-                # Append the image URL to the list
-                image_urls.append(image_url)
-            else:
-                # Raise an exception if the file is not an image
-                raise Exception(f"{image.filename} is not an image file")
-
-        return {'status': 200, 'message': 'Images uploaded successfully', 'image_urls': image_urls}
-    except Exception as e:
-        return {'status': 500, 'error': str(e)}
-
-
-# API endpoint to return the OCR text of the images uploaded
-@app.get("/process-images/")
-async def process_images():
-    try:
-        # Initialize video data as an empty list
-        video_data = []
-
-        # Get a reference to the Firestore collection
-        db = firestore.client()
-        images_ref = db.collection('images')
-
-        # Retrieve all image documents from Firestore
-        images = images_ref.stream()
-
-        # Create a temporary directory for downloading images
-        temp_dir = tempfile.mkdtemp(prefix='image_download_')
-
-        # Process each image in Firestore
-        for image in images:
-            image_data = image.to_dict()
-            if image_data:
-                image_url = image_data.get('url')
-
-                # Generate a unique, short filename
-                image_filename = f"image_{str(uuid.uuid4())}"
-
-                image_local_path = os.path.join(temp_dir, image_filename)
-
-                # Download the image from its original URL
-                original_image_response = requests.get(image_url)
-                if original_image_response.status_code == 200:
-                    with open(image_local_path, "wb") as local_image_file:
-                        local_image_file.write(original_image_response.content)
-
-                # Call the function with the chosen OCR library
-                extracted_text = extract_and_reformat_text(image_local_path, extract_text_with_tesseract)
-
-                # Text processing
-                cleaned_text = filter_text(extracted_text)
-                cleaned_text = clean_and_format_text(cleaned_text)
-                series, part = extract_series_and_part(extracted_text)
-                cleaned_text = split_and_clean_text(cleaned_text)
-
-                # Update the video data and append it
-                video_data.append({
-                    "series": series,
-                    "part": part,
-                    "outro": "Visit www.myconfessions.co.za to anonymously confess",
-                    "path": image_local_path,  # Use the local path of the downloaded image
-                    "text": cleaned_text
-                })
-
-                # Delete the temporary image
-                os.remove(image_local_path)
-
-        # Sort video_data by the 'part' field in ascending order
-        video_data = sorted(video_data, key=lambda x: int(x["part"]))
-
-        # Write video_data to a JSON file
-        video_json_path = os.path.join(temp_dir, 'video.json')
-        with open(video_json_path, 'w', encoding='utf-8') as video_json_file:
-            json.dump(video_data, video_json_file, ensure_ascii=False, indent=4)
-
-        return FileResponse(video_json_path, headers={"Content-Disposition": "attachment; filename=video.json"})
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-# Endpoint to get a JSON list of filenames from the Firestore images collection
-@app.get("/list-images/")
-async def list_images():
-    try:
-        # Get a reference to the Firestore collection
-        db = firestore.client()
-        images_ref = db.collection('images')
-
-        # Retrieve all image documents from Firestore
-        images = images_ref.stream()
-
-        # Extract filenames from Firestore documents
-        filenames = [image.to_dict().get('filename') for image in images]
-
-        return {"files": filenames}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-# API endpoint to delete a specific image from Firestore and Storage
-@app.delete("/delete-image/{filename}")
-async def delete_image(filename: str):
-    try:
-        # Get a reference to the Firestore collection
-        db = firestore.client()
-        images_ref = db.collection('images')
-
-        # Query Firestore to find the image with the specified filename
-        query = images_ref.where('filename', '==', filename)
-        results = query.stream()
-
-        # Check if the image with the specified filename exists
-        found = False
-        for image in results:
-            found = True
-            image_data = image.to_dict()
-
-            # Delete the document in Firestore
-            image.reference.delete()
-
-            # Delete the corresponding image in the Firebase Storage bucket
-            bucket = storage.bucket()
-            blob = bucket.blob(filename)
-            blob.delete()
-
-        if found:
-            return {"message": f"Image '{filename}' deleted successfully from Firestore and Storage"}
-        else:
-            return {"message": f"Image '{filename}' not found in the database"}
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-# API endpoint to delete all images stored on the server
-@app.delete("/delete-images/")
-async def delete_images():
-    try:
-        # Get a reference to the Firestore collection
-        db = firestore.client()
-        images_ref = db.collection('images')
-
-        # Retrieve all image documents from Firestore
-        images = images_ref.stream()
-
-        # Check if the 'images' collection is not empty
-        images_exist = False
-
-        for image in images:
-            images_exist = True
-            image_data = image.to_dict()
-            if image_data:
-                filename = image_data.get('filename')
-
-                # Delete the document in Firestore
-                image.reference.delete()
-
-                # Delete the corresponding object from the Firebase Storage bucket
-                bucket = storage.bucket()
-                blob = bucket.blob(filename)
-                blob.delete()
-
-        if images_exist:
-            return {"message": "All images deleted successfully"}
-        else:
-            return {"message": "No images found to delete"}
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
