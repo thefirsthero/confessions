@@ -170,9 +170,9 @@ async def process_images():
                 extracted_text = extract_and_reformat_text(image_local_path, extract_text_with_tesseract)
 
                 # Text processing
+                series, part = extract_series_and_part(extracted_text)
                 cleaned_text = filter_text(extracted_text)
                 cleaned_text = clean_and_format_text(cleaned_text)
-                series, part = extract_series_and_part(extracted_text)
                 cleaned_text = split_and_clean_text(cleaned_text)
 
                 # Update the video data and append it
