@@ -1,0 +1,15 @@
+edge-tts==6.1.8
+fastapi==0.103.2
+ffmpeg-python==0.2.0
+firebase-admin==6.2.0
+python-dotenv==1.0.0
+rich==13.5.2
+stable-ts==2.10.0
+tqdm==4.66.1
+yt-dlp==2023.7.6
+--find-links https://download.pytorch.org/whl/torch_stable.html
+torch==2.0.0
+torchaudio==2.0.1
+torchvision==0.15.1
+pytesseract==0.3.10
+uvicorn==0.23.2

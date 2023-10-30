@@ -1,0 +1,78 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: confessions-fast-api-server
+  namespace: '1033224720846'
+  selfLink: /apis/serving.knative.dev/v1/namespaces/1033224720846/services/confessions-fast-api-server
+  uid: ad71827f-9008-42a1-90ce-382600775d9a
+  resourceVersion: AAYI8bAWQ0o
+  generation: 19
+  creationTimestamp: '2023-10-09T19:46:03.091362Z'
+  labels:
+    cloud.googleapis.com/location: europe-west1
+  annotations:
+    run.googleapis.com/client-name: cloud-console
+    serving.knative.dev/creator: vukosi90@gmail.com
+    serving.knative.dev/lastModifier: vukosi90@gmail.com
+    run.googleapis.com/operation-id: 3cb1e908-61da-4467-9f9c-34b76526cef4
+    run.googleapis.com/ingress: all
+    run.googleapis.com/ingress-status: all
+spec:
+  template:
+    metadata:
+      labels:
+        client.knative.dev/nonce: 268f2699-6e1d-4198-8bcb-adbc6bc987a3
+        run.googleapis.com/startupProbeType: Default
+      annotations:
+        run.googleapis.com/client-name: cloud-console
+        autoscaling.knative.dev/maxScale: '100'
+        run.googleapis.com/startup-cpu-boost: 'true'
+    spec:
+      containerConcurrency: 80
+      timeoutSeconds: 300
+      serviceAccountName: firebase-adminsdk-xv5tv@confessions-e4a11.iam.gserviceaccount.com
+      containers:
+      - name: api-myconfessions-imgproc-confessing-1
+        image: thefirsthero/api-myconfessions-imgproc-confessing:1.0.0
+        ports:
+        - name: http1
+          containerPort: 8000
+        env:
+        - name: MY_VARIABLE_1
+          value: https://myconfessions.co.za
+        - name: MY_VARIABLE_2
+          value: https://www.myconfessions.co.za
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 512Mi
+        startupProbe:
+          timeoutSeconds: 240
+          periodSeconds: 240
+          failureThreshold: 1
+          tcpSocket:
+            port: 8000
+  traffic:
+  - percent: 100
+    latestRevision: true
+status:
+  observedGeneration: 19
+  conditions:
+  - type: Ready
+    status: 'True'
+    lastTransitionTime: '2023-10-30T16:39:54.564703Z'
+  - type: ConfigurationsReady
+    status: 'True'
+    lastTransitionTime: '2023-10-30T16:39:36.934277Z'
+  - type: RoutesReady
+    status: 'True'
+    lastTransitionTime: '2023-10-30T16:39:54.653514Z'
+  latestReadyRevisionName: confessions-fast-api-server-00019-cz9
+  latestCreatedRevisionName: confessions-fast-api-server-00019-cz9
+  traffic:
+  - revisionName: confessions-fast-api-server-00019-cz9
+    percent: 100
+    latestRevision: true
+  url: https://confessions-fast-api-server-nh65oghlwa-ew.a.run.app
+  address:
+    url: https://confessions-fast-api-server-nh65oghlwa-ew.a.run.app
