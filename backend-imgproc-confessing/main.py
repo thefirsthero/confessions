@@ -180,7 +180,6 @@ async def process_images():
                     "series": series,
                     "part": part,
                     "outro": "Visit www.myconfessions.co.za to anonymously confess",
-                    "path": image_local_path,  # Use the local path of the downloaded image
                     "text": cleaned_text
                 })
 
