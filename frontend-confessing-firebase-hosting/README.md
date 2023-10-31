@@ -58,6 +58,8 @@ docker push thefirsthero/confessions-react-frontend:{{tagname}}
 6. Run `npm run build` to build react app.
 7. Run `firebase deploy` to deploy. 
 
+NB: Consult the pdf guide in the `firebase_tutorial` directory for injecting environment variables into a firebase hosted react app.
+
 ### Docker Tutorial Videos that aided in this Project:
 
 Found in`./docker_tutorial`
