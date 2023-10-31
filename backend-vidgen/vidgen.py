@@ -382,8 +382,8 @@ def create_full_text(path: str = '', series: str = '', part: int = 1, text: str 
         Tuple[str, str]: A tuple containing the resulting text and the filename of the text file.
 
     """
-    # req_text = f"{series} Part {part}.\n{text}\n{outro}" # This line had the series, part and then the text & outro
-    req_text = f"Confession {part}.\n{text}\n{outro}" # This line had the series, part and then the text & outro
+    req_text = f"{series} Part {part}.\n{text}\n{outro}" # This line had the series, part and then the text & outro
+    # req_text = f"Confessions.\n{text}\n{outro}" # This line had the series, part and then the text & outro
     # req_text = f"{text}\n{outro}" # This line removes the series & part, it's just the text & outro now
     series = series.replace(' ', '_')
     filename = f"{path}{os.sep}{series}{os.sep}{series}_{part}.mp3"
