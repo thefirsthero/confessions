@@ -287,4 +287,7 @@ async def delete_images():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-
+# Healthcheck Endpoint
+@app.get("/healthcheck")
+async def healthcheck():
+    return {"status": "ok"}
