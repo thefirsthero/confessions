@@ -3,12 +3,22 @@ import Navbar from 'react-bootstrap/Navbar';
 import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import { NavLink } from 'react-router-dom';
+// Import the TikTok logo image or use the image URL
+import tiktokLogo from './assets/tiktok-logo.png';
+// const tiktokLogo = 'https://i.imgur.com/xxxxxx.png';
+import './Navbar.css';
 
 function AppNavbar() {
   const [expanded, setExpanded] = useState(false);
 
   const closeNav = () => {
     setExpanded(false);
+  };
+
+  // Function to open your TikTok account page in a new tab/window
+  const openTikTokPage = () => {
+    // Replace 'YOUR_TIKTOK_PROFILE_URL' with your actual TikTok profile URL
+    window.open('https://www.tiktok.com/@zaconfessions', '_blank');
   };
 
   return (
@@ -28,6 +38,10 @@ function AppNavbar() {
                 Feed
               </NavLink>
             </Nav.Item>
+            <Nav.Item className="d-flex align-items-center">
+              <img src={tiktokLogo} alt="TikTok" className="tiktok-logo ms-2" onClick={openTikTokPage} />
+            </Nav.Item>
+
           </Nav>
         </Navbar.Collapse>
       </Container>
