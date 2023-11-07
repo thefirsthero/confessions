@@ -28,6 +28,9 @@ function AppNavbar() {
         <Navbar.Toggle aria-controls="responsive-navbar-nav" onClick={() => setExpanded(!expanded)} />
         <Navbar.Collapse id="responsive-navbar-nav" className="justify-content-end">
           <Nav className="ml-auto">
+            <Nav.Item className="d-flex align-items-center">
+              <img src={tiktokLogo} alt="TikTok" className="tiktok-logo me-2" onClick={openTikTokPage} />
+            </Nav.Item>
             <Nav.Item>
               <NavLink to="/make-confession" className="nav-link" onClick={closeNav}>
                 Make Confession
@@ -38,10 +41,6 @@ function AppNavbar() {
                 Feed
               </NavLink>
             </Nav.Item>
-            <Nav.Item className="d-flex align-items-center">
-              <img src={tiktokLogo} alt="TikTok" className="tiktok-logo ms-2" onClick={openTikTokPage} />
-            </Nav.Item>
-
           </Nav>
         </Navbar.Collapse>
       </Container>
