@@ -32,22 +32,3 @@ It correctly bundles React in production mode and optimizes the build for the be
 
 The build is minified and the filenames include the hashes.\
 Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `docker compose -f docker-compose.development.yaml up --build`
-
-To run the docker container instead of using npm; it will build the container first, the run it.
-After the first build you can just run `docker compose -f docker-compose.development.yaml up`
-
-### Deployment
-
-To Deploy frontend I am making use of Docker.
-```bash
-docker build -t thefirsthero/confessions-react-frontend:{{tagname}} .
-docker push thefirsthero/confessions-react-frontend:{{tagname}}
-```
-
-### Docker Tutorial Videos that aided in this Project:
-
-Found in`./docker_tutorial`
