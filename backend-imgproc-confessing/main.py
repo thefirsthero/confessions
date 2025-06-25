@@ -28,12 +28,13 @@ app = FastAPI()
 # Get allowed servers from env file
 react_app_origin_1 = env['ALLOWED_URL_1']
 react_app_origin_2 = env['ALLOWED_URL_2']
-render_url = env['RENDER_EXTERNAL_URL']
+render_external__url = env['RENDER_EXTERNAL_URL']
 
 # Configure CORS to allow requests from your React app's origin
 origins = [
     react_app_origin_1,
-    react_app_origin_2
+    react_app_origin_2,
+    render_external__url
 ]
 app.add_middleware(
     CORSMiddleware,
@@ -395,8 +396,8 @@ async def self_ping():
             await asyncio.sleep(12 * 60)  # Wait for 12 minutes
             url = "http://localhost:8000/healthcheck"  # Use internal URL
             # For Render, use its public URL instead:
-            if render_url:
-                url = f"{render_url.rstrip('/')}/healthcheck"
+            if render_external__url:
+                url = f"{render_external__url.rstrip('/')}/healthcheck"
             response = requests.get(url, timeout=10)
             print(f"[Self Ping] Status: {response.status_code}")
         except Exception as e:
