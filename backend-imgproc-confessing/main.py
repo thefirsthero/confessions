@@ -385,3 +385,23 @@ async def myconfessions_json():
 @app.get("/healthcheck")
 async def healthcheck():
     return {"status": "ok"}
+
+import asyncio
+
+async def self_ping():
+    while True:
+        try:
+            await asyncio.sleep(12 * 60)  # Wait for 12 minutes
+            url = "http://localhost:8000/healthcheck"  # Use internal URL
+            # For Render, use its public URL instead:
+            render_url = os.getenv("RENDER_EXTERNAL_URL")
+            if render_url:
+                url = f"{render_url.rstrip('/')}/healthcheck"
+            response = requests.get(url, timeout=10)
+            print(f"[Self Ping] Status: {response.status_code}")
+        except Exception as e:
+            print(f"[Self Ping] Error: {e}")
+
+@app.on_event("startup")
+async def startup_event():
+    asyncio.create_task(self_ping())
