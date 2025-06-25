@@ -38,9 +38,9 @@ spec:
         - name: http1
           containerPort: 8000
         env:
-        - name: MY_VARIABLE_1
+        - name: ALLOWED_URL_1
           value: https://myconfessions.co.za
-        - name: MY_VARIABLE_2
+        - name: ALLOWED_URL_2
           value: https://www.myconfessions.co.za
         resources:
           limits:

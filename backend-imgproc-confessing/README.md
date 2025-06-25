@@ -17,7 +17,7 @@ These files will host the allowed react app servers' ip addresses for each envir
 
 They will look like:
 ```
-MY_VARIABLE_1=http://localhost:3000
+ALLOWED_URL_1=http://localhost:3000
 ```
 
 ### To use this REST API, you need to download Firebase credentials from your Firebase console 🤓

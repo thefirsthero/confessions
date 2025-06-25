@@ -4,11 +4,11 @@ import requests
 
 def main():
     # Get the base URL from the environment variable
-    # BASE_URL = os.environ.get('MY_VARIABLE_1')
+    # BASE_URL = os.environ.get('ALLOWED_URL_1')
     BASE_URL = 'https://myconfessions-api.onrender.com'
     
     if BASE_URL is None:
-        print("Environment variable MY_VARIABLE_1 is not set.")
+        print("Environment variable ALLOWED_URL_1 is not set.")
         return
 
     # Define the API endpoint URL

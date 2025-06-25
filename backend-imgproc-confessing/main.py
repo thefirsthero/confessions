@@ -26,8 +26,9 @@ app = FastAPI()
 
 '''The below section allows specific ip addresses to make requests'''
 # Get allowed servers from env file
-react_app_origin_1 = env['MY_VARIABLE_1']
-react_app_origin_2 = env['MY_VARIABLE_2']
+react_app_origin_1 = env['ALLOWED_URL_1']
+react_app_origin_2 = env['ALLOWED_URL_2']
+render_url = env['RENDER_EXTERNAL_URL']
 
 # Configure CORS to allow requests from your React app's origin
 origins = [
@@ -394,7 +395,6 @@ async def self_ping():
             await asyncio.sleep(12 * 60)  # Wait for 12 minutes
             url = "http://localhost:8000/healthcheck"  # Use internal URL
             # For Render, use its public URL instead:
-            render_url = os.getenv("RENDER_EXTERNAL_URL")
             if render_url:
                 url = f"{render_url.rstrip('/')}/healthcheck"
             response = requests.get(url, timeout=10)
