@@ -405,4 +405,6 @@ async def self_ping():
 
 @app.on_event("startup")
 async def startup_event():
-    asyncio.create_task(self_ping())
+    enable_self_ping = env.get("ENABLE_SELF_PING", "false").lower()
+    if enable_self_ping == "true":
+        asyncio.create_task(self_ping())
