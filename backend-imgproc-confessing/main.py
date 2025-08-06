@@ -380,6 +380,6 @@ async def myconfessions_json():
         raise HTTPException(status_code=500, detail=str(e))
 
 # Healthcheck Endpoint
-@app.get("/healthcheck")
+@app.get("/health")
 async def healthcheck():
     return {"status": "ok"}
