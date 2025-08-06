@@ -1,26 +1,32 @@
 My server for text extraction and cleaning from images for my WhisperConfesssions project
 
 # Before you start
+
 I recommend working with a virtual environment:
+
 ```
 python -m venv venv
 .\venv\Scripts\activate
 ```
 
 ### First, install the necessary dependencies 🖥
+
 ```
 pip install -r requirement.txt
 ```
 
 ### Then setup .env files:
-These files will host the allowed react app servers' ip addresses for each environment.
+
+These files will host the allowed frontend url's for each environment.
 
 They will look like:
+
 ```
-ALLOWED_URL_1=http://localhost:3000
+FRONTEND_URL=http://localhost:3000
 ```
 
 ### To use this REST API, you need to download Firebase credentials from your Firebase console 🤓
+
 To do this process:
 
 - Go to Firebase 🌎
@@ -31,13 +37,14 @@ To do this process:
 - Add the generated file to the root of the REST API 📩
 - Rename the file to "serviceAccountKey.json" 📄
 
-
 With this, you can now run your REST API using the command 🖥
+
 ```
-uvicorn main:app --reload 
+uvicorn main:app --reload
 ```
 
 # OR
+
 ### Use Docker (Testing):
 
 Run: `docker compose -f docker-compose.development.yaml up --build` to build and run app in development environment (1st time)
@@ -47,6 +54,7 @@ NB: There is a docket cheatsheet in the root `backend` directory
 NB: Run: `docker compose -f docker-compose.production.yaml up --build -d` to build and run production app in detached mode (1st time)
 
 ### To Build Docker Image and Push to Dockerhub (Deployment):
+
 Run `docker build -t thefirsthero/confessions-fast-api-server:1.0.0 .` (build)
 Run `docker push thefirsthero/confessions-fast-api-server1.0.0` (push)
 
@@ -58,7 +66,7 @@ The URL http://127.0.0.1:8000/ will return a json of all confessions currently p
 
 The URL http://127.0.0.1:8000/addConfession allows you to post a confession to the confessions collection on the firebase firestore.
 
-The URL http://127.0.0.1:8000/upload-images/  allows you to upload images to the server memory using the POST method.
+The URL http://127.0.0.1:8000/upload-images/ allows you to upload images to the server memory using the POST method.
 
 The URL http://127.0.0.1:8000/list-images/ will return a complete list of all images currently on the server.
 
