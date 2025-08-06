@@ -23,6 +23,7 @@ They will look like:
 
 ```
 FRONTEND_URL=http://localhost:3000
+FIREBASE_SERVICE_ACCOUNT_JSON={FIREBASE_SERVICE_ACCOUNT_JSON}
 ```
 
 ### To use this REST API, you need to download Firebase credentials from your Firebase console 🤓
