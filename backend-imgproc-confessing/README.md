@@ -68,6 +68,8 @@ The URL http://127.0.0.1:8000/delete-images/ allows you to delete all images cur
 
 The URL http://127.0.0.1:8000/delete-image/{filename} allows you to delete {filename} from the server.
 
+The URL http://127.0.0.1:8000/healthcheck allows you to check the health of the API.
+
 - [Firebase documentation](https://firebase.google.com/docs?authuser=0&hl=es)
 - [FastAPI documentation](https://fastapi.tiangolo.com/tutorial/)
 
