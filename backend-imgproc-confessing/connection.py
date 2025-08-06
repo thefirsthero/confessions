@@ -4,10 +4,10 @@ import base64
 import firebase_admin
 from firebase_admin import credentials, firestore
 
-firebase_json_b64 = env.get('FIREBASE_SERVICE_ACCOUNT_JSON')
+firebase_json_b64 = env.get('FIREBASE_SERVICE_ACCOUNT_JSON_B64')
 
 if not firebase_json_b64:
-    raise RuntimeError("Missing FIREBASE_SERVICE_ACCOUNT_JSON environment variable")
+    raise RuntimeError("Missing FIREBASE_SERVICE_ACCOUNT_JSON_B64 environment variable")
 
 # Decode the base64 string
 firebase_json = base64.b64decode(firebase_json_b64).decode('utf-8')
