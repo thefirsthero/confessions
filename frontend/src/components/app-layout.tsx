@@ -1,6 +1,7 @@
 import { Outlet } from "react-router";
 import { AppHeader } from "./app-header";
 import { AppFooter } from "./app-footer";
+import { FloatingActionButton } from "./floating-action-button";
 
 export function AppLayout() {
   return (
@@ -12,6 +13,7 @@ export function AppLayout() {
         </div>
         <AppFooter />
       </div>
+      <FloatingActionButton />
     </div>
   );
 }
