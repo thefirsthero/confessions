@@ -4,7 +4,7 @@ This is a web app that allows users to anonymously share and view confessions fr
 
 # Technologies Used
 
-Firebase, FastAPI, React, TypeScript, Tailwind CSS, HTML, CSS, JavaScript, Docker.
+Firebase, FastAPI, React, TypeScript, Tailwind CSS, Docker.
 
 # To Run the Backend
 
