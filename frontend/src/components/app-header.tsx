@@ -3,6 +3,7 @@ import { mainMenu } from "@/config/menu";
 import { cn } from "@/lib/utils";
 import { AppLogo } from "./app-logo";
 import { AppSidebar } from "./app-sidebar";
+import { AppNavbar } from "./app-navbar";
 
 export function AppHeader() {
   return (
@@ -38,7 +39,9 @@ export function AppHeader() {
               ))}
             </nav>
           </div>
-          <nav className="flex gap-1"></nav>
+          <nav className="flex gap-1">
+            <AppNavbar />
+          </nav>
         </div>
       </div>
     </header>

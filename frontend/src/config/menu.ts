@@ -1,4 +1,4 @@
-import { Files, Gauge, LucideIcon } from "lucide-react";
+import { Files, Newspaper, LucideIcon } from "lucide-react";
 
 type MenuItemType = {
   title: string;
@@ -18,6 +18,6 @@ export const mainMenu: MenuType = [
   {
     title: "Feed",
     url: "/feed",
-    icon: Gauge,
+    icon: Newspaper,
   },
 ];
