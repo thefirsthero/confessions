@@ -38,8 +38,7 @@ export function AppHeader() {
               ))}
             </nav>
           </div>
-          <nav className="flex gap-1">
-          </nav>
+          <nav className="flex gap-1"></nav>
         </div>
       </div>
     </header>
