@@ -1,9 +1,9 @@
-
 import { Button } from "@/components/ui/button";
+import { appConfig } from "@/config/app";
 
 export function AppNavbar() {
   const openTikTokPage = () => {
-    window.open("https://www.tiktok.com/@zaconfessions", "_blank");
+    window.open(appConfig.tiktok.url, "_blank");
   };
 
   return (

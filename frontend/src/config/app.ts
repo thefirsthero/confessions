@@ -9,6 +9,9 @@ type AppConfigType = {
     url: string;
   };
   apiUrl: string;
+  tiktok: {
+    url: string;
+  };
 };
 
 export const appConfig: AppConfigType = {
@@ -22,6 +25,9 @@ export const appConfig: AppConfigType = {
     url: "https://github.com/thefirsthero/",
   },
   apiUrl: import.meta.env.VITE_API_URL ?? "http://localhost:8000",
+  tiktok: {
+    url: "https://www.tiktok.com/@zaconfessions",
+  },
 };
 
 export const baseUrl = import.meta.env.VITE_BASE_URL ?? "";
