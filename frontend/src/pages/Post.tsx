@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { PageHeader, PageHeaderHeading } from "@/components/page-header";
 import axios from 'axios';
+import { appConfig } from "@/config/app";
 
 function Post() {
     const [confession, setConfession] = useState('');
@@ -21,11 +22,8 @@ function Post() {
         setUploadError(null);
         setUploadSuccess(null);
 
-        // Get the base API URL from .env
-        const baseUrl = import.meta.env.REACT_APP_API_URL;
-
         // Append the specific endpoint
-        const apiUrl = `${baseUrl}/addConfession`;
+        const apiUrl = `${appConfig.apiUrl}/addConfession`;
 
         try {
             setIsUploading(true);

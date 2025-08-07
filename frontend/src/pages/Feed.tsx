@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { PageHeader, PageHeaderHeading } from "@/components/page-header";
 import axios from 'axios';
+import { appConfig } from "@/config/app";
 
 interface Confession {
   id: number;
@@ -14,8 +15,7 @@ function Feed() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const baseUrl = import.meta.env.REACT_APP_API_URL;
-        const apiUrl = `${baseUrl}/`;
+        const apiUrl = `${appConfig.apiUrl}/`;
 
         axios
             .get(apiUrl)

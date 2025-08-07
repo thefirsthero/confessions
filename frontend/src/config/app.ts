@@ -8,6 +8,7 @@ type AppConfigType = {
     name: string;
     url: string;
   };
+  apiUrl: string;
 };
 
 export const appConfig: AppConfigType = {
@@ -20,6 +21,7 @@ export const appConfig: AppConfigType = {
     name: "thefirsthero",
     url: "https://github.com/thefirsthero/",
   },
+  apiUrl: import.meta.env.VITE_API_URL ?? "http://localhost:8000",
 };
 
 export const baseUrl = import.meta.env.VITE_BASE_URL ?? "";
