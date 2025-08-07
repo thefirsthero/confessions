@@ -15,6 +15,7 @@ import { AppSidebar } from "./app-sidebar";
 import { Button, buttonVariants } from "./ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { appConfig, baseUrl } from "@/config/app";
+import { AppNavbar } from "./app-navbar";
 import GitHub from "./icons/github";
 
 export function AppHeader() {
@@ -93,6 +94,7 @@ export function AppHeader() {
             </nav>
           </div>
           <nav className="flex gap-1">
+            <AppNavbar />
             <a
               href={appConfig.github.url}
               title={appConfig.github.title}
