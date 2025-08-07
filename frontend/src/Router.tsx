@@ -8,7 +8,8 @@ export default function Router() {
     <Routes>
       <Route element={<AppLayout />}>
         <Route path="/" element={<Feed />} />
-        <Route path="/make-confession" element={<Post />} />
+        <Route path="/feed" element={<Feed />} />
+        <Route path="/post" element={<Post />} />
         {/* Keep a catch-all for now, can be simplified later if needed */}
         <Route path="*" element={<Feed />} /> 
       </Route>
