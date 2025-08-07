@@ -1,14 +1,8 @@
 import { useState, useEffect } from "react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
 import { PageHeader, PageHeaderHeading } from "@/components/page-header";
 import axios from "axios";
 import { appConfig } from "@/config/app";
+import { ConfessionCard } from "@/components/confession-card";
 
 interface Confession {
   id: number;
@@ -51,19 +45,9 @@ function Feed() {
       )}
 
       {!loading && confessions.length > 0 && (
-        <div>
-          {confessions.map((confession: Confession, index: number) => (
-            <Card key={index} className="mb-3">
-              <CardHeader>
-                <CardTitle>Confession #{confession.id}</CardTitle>
-                <CardDescription>
-                  Location: {confession.location}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p>{confession.confession}</p>
-              </CardContent>
-            </Card>
+        <div className="columns-1 sm:columns-2 lg:columns-3 gap-4">
+          {confessions.map((confession: Confession) => (
+            <ConfessionCard key={confession.id} confession={confession} />
           ))}
         </div>
       )}
