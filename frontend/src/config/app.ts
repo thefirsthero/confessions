@@ -12,6 +12,7 @@ type AppConfigType = {
   tiktok: {
     url: string;
   };
+  buyMeACoffeeUrl?: string;
 };
 
 export const appConfig: AppConfigType = {
@@ -28,6 +29,9 @@ export const appConfig: AppConfigType = {
   tiktok: {
     url: "https://www.tiktok.com/@zaconfessions",
   },
+  buyMeACoffeeUrl:
+    import.meta.env.VITE_BUY_ME_A_COFFEE_URL ??
+    "https://www.buymeacoffee.com/thefirsthero",
 };
 
 export const baseUrl = import.meta.env.VITE_BASE_URL ?? "";
