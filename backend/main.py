@@ -20,6 +20,8 @@ from os import environ as env
 from os import remove
 from firebase_admin import storage, firestore
 import tempfile
+import asyncio
+import schedule
 
 # Create an instance of FastAPI to handle routes
 app = FastAPI()
@@ -40,6 +42,27 @@ app.add_middleware(
     allow_methods=["*"],  # Allow all methods (GET, POST, etc.)
     allow_headers=["*"],  # Allow all headers
 )
+
+# Self-ping functionality to keep the server alive
+async def ping_server():
+    try:
+        url = env.get('HEALTHCHECK_URL')
+        if url:
+            requests.get(url)
+            print(f"Pinged {url} at {datetime.datetime.now()}")
+    except Exception as e:
+        print(f"Ping failed: {e}")
+
+async def run_scheduler():
+    schedule.every(4).minutes.do(lambda: asyncio.create_task(ping_server()))
+    while True:
+        schedule.run_pending()
+        await asyncio.sleep(1)
+
+@app.on_event("startup")
+async def startup_event():
+    if env.get('SELF_PING_ENABLED', 'false').lower() == 'true':
+        asyncio.create_task(run_scheduler())
 
 # We access the 'users' collection in the database (Firestore instance)
 confessions = db.collection(u'confessions')
