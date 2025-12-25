@@ -24,13 +24,15 @@ scoop install uv
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-### Create virtual environment and install dependencies 🖥
+### Install dependencies 🖥
 
 ```bash
-uv venv
+# Creates .venv and installs all dependencies
+uv sync
+
+# Activate the virtual environment (optional, for interactive shell use)
 .venv\Scripts\activate  # Windows
 source .venv/bin/activate  # macOS/Linux
-uv sync
 ```
 
 ## UV Package Management Commands
