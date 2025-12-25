@@ -69,6 +69,14 @@ def clean_and_format_text(text):
 
     # Replace '|' with 'I'
     text = text.replace('|', 'I')
+    
+    # Fix common OCR errors where "I" is misread as two apostrophes
+    # Pattern: two apostrophes followed by lowercase letter (e.g., ''m -> I'm)
+    text = re.sub(r"''([a-z])", r"I'\1", text)
+    # Pattern: standalone two apostrophes between spaces (e.g., " '' " -> " I ")
+    text = re.sub(r"\s''\s", " I ", text)
+    # Pattern: two apostrophes at start of word (e.g., "''ll" -> "I'll")
+    text = re.sub(r"\b''", "I", text)
 
     return text
 

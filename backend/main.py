@@ -3,7 +3,7 @@ import time
 import uuid
 from src.connection import get_pool, query, fetchrow, execute, close_pool
 from fastapi import FastAPI, File, UploadFile, HTTPException
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 import requests
 import uvicorn
 import os
@@ -19,6 +19,8 @@ from os import environ as env
 import tempfile
 import asyncio
 import anyio
+import cv2
+import numpy as np
 
 # Create an instance of FastAPI to handle routes
 app = FastAPI()
@@ -203,6 +205,99 @@ async def myconfessions_json():
         return response
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+# API endpoint to process images and generate video.json
+@app.post("/process-images/")
+async def process_images(images: List[UploadFile] = File(...)):
+    """
+    Process uploaded images with OCR and generate video.json structure.
+    Images are processed in-memory without saving to disk.
+    
+    Returns JSON array with format:
+    [
+        {
+            "series": "Confessions",
+            "part": "1",
+            "outro": "Visit www.myconfessions.co.za to anonymously confess",
+            "text": "extracted and cleaned confession text"
+        },
+        ...
+    ]
+    """
+    try:
+        video_data = []
+        
+        # Standard values for video generation
+        series = "Confessions"
+        outro = "Visit www.myconfessions.co.za to anonymously confess"
+        
+        for idx, image in enumerate(images, start=1):
+            # Validate image type
+            if not image.content_type or not image.content_type.startswith('image/'):
+                raise HTTPException(
+                    status_code=400, 
+                    detail=f"File '{image.filename}' is not a valid image"
+                )
+            
+            # Read image bytes
+            image_bytes = await image.read()
+            
+            # Convert bytes to numpy array for OpenCV
+            nparr = np.frombuffer(image_bytes, np.uint8)
+            img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+            
+            if img is None:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Could not decode image '{image.filename}'"
+                )
+            
+            # Create temporary file for OCR processing
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as temp_file:
+                temp_path = temp_file.name
+                cv2.imwrite(temp_path, img)
+            
+            try:
+                # Extract text with OCR
+                extracted_text = extract_and_reformat_text(temp_path, extract_text_with_tesseract)
+                
+                # Process text
+                series_name, part_number = extract_series_and_part(extracted_text)
+                cleaned_text = filter_text(extracted_text)
+                cleaned_text = clean_and_format_text(cleaned_text)
+                cleaned_text = split_and_clean_text(cleaned_text)
+                
+                # Use extracted part number if available, otherwise use index
+                part = part_number if part_number else str(idx)
+                
+                # Build video data entry
+                video_entry = {
+                    "series": series_name if series_name else series,
+                    "part": part,
+                    "outro": outro,
+                    "text": cleaned_text.strip()
+                }
+                
+                video_data.append(video_entry)
+                
+            finally:
+                # Clean up temporary file
+                if os.path.exists(temp_path):
+                    os.unlink(temp_path)
+        
+        # Sort by part number (numeric sort)
+        try:
+            video_data = sorted(video_data, key=lambda x: int(x["part"]))
+        except (ValueError, KeyError):
+            # If sorting fails, keep original order
+            pass
+        
+        return JSONResponse(content=video_data)
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error processing images: {str(e)}")
 
 # Healthcheck Endpoint
 @app.get("/health")

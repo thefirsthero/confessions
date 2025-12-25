@@ -3,8 +3,8 @@ from typing import Callable
 
 # Function to preprocess an image
 def preprocess_image(image):
-    # img = cv2.resize(image, (0, 0), fx=2, fy=2)
-    img = image.copy()
+    # Up-sample for better OCR accuracy (2x)
+    img = cv2.resize(image, (0, 0), fx=2, fy=2)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     image = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
     return image
