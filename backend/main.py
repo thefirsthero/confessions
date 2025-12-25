@@ -23,6 +23,9 @@ import cv2
 import numpy as np
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
+from pydantic import BaseModel
+import bcrypt
+import jwt
 
 # Create an instance of FastAPI to handle routes
 app = FastAPI()
@@ -43,8 +46,8 @@ app.add_middleware(
 # API Key Authentication Middleware
 class APIKeyMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next):
-        # Skip authentication for health check endpoint
-        if request.url.path == "/health":
+        # Skip authentication for health check and auth endpoints
+        if request.url.path in ["/health", "/auth/login"]:
             return await call_next(request)
         
         # Skip authentication for CORS preflight requests
@@ -120,6 +123,61 @@ def clean_confession_text(text: str) -> str:
     # Replace multiple spaces with single space
     cleaned = ' '.join(cleaned.split())
     return cleaned
+
+# Auth models
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+class LoginResponse(BaseModel):
+    token: str
+    user: dict
+
+# JWT Configuration
+JWT_SECRET = env.get('JWT_SECRET', 'change-this-secret-in-production')
+JWT_ALGORITHM = 'HS256'
+JWT_EXPIRATION_DAYS = 30
+
+# Auth endpoint
+@app.post("/auth/login", response_model=LoginResponse)
+async def login(login_data: LoginRequest):
+    """Authenticate admin user and return JWT token"""
+    try:
+        # Find user by email from public schema
+        user = await fetchrow("""
+            SELECT id, email, password_hash
+            FROM public.users
+            WHERE email = $1
+        """, login_data.email)
+        
+        if not user:
+            raise HTTPException(status_code=401, detail="Invalid credentials")
+        
+        # Verify password
+        is_valid = bcrypt.checkpw(
+            login_data.password.encode('utf-8'),
+            user['password_hash'].encode('utf-8')
+        )
+        
+        if not is_valid:
+            raise HTTPException(status_code=401, detail="Invalid credentials")
+        
+        # Generate JWT token
+        token_data = {
+            'userId': user['id'],
+            'exp': datetime.datetime.utcnow() + datetime.timedelta(days=JWT_EXPIRATION_DAYS)
+        }
+        token = jwt.encode(token_data, JWT_SECRET, algorithm=JWT_ALGORITHM)
+        
+        return LoginResponse(
+            token=token,
+            user={'id': user['id'], 'email': user['email']}
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Login error: {e}")
+        raise HTTPException(status_code=500, detail="Login failed")
 
 # Get all confessions
 @app.get("/confessions")
