@@ -107,9 +107,7 @@ function ExportConfessions() {
                     {
                       series: "Your Confessions",
                       part: "1",
-                      outro:
-                        "Visit www.myconfessions.co.za to anonymously confess",
-                      path: "/content/drive/...",
+                      outro: "Visit confess.coraxi.com to anonymously confess",
                       text: "Confession text with location appended.",
                     },
                   ],

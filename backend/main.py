@@ -250,10 +250,9 @@ async def export_confessions():
         # Initialize a list to store the generated JSON data
         generated_json = []
 
-        # Define common values for series, outro, and path
+        # Define common values for series and outro
         series = "Your Confessions"
-        outro = "Visit www.myconfessions.co.za to anonymously confess"
-        path = "/content/drive/MyDrive/Colab Notebooks/AI_Bots/ContentGen/Whisper-Tiktok/code/Trash"
+        outro = "Visit confess.coraxi.com to anonymously confess"
 
         # Function to append location with proper punctuation
         def append_location(text, location):
@@ -278,7 +277,6 @@ async def export_confessions():
                 "series": series,
                 "part": str(confession_id),
                 "outro": outro,
-                "path": path,
                 "text": full_text.strip()
             }
 
@@ -312,7 +310,7 @@ async def process_images(images: List[UploadFile] = File(...)):
         {
             "series": "Confessions",
             "part": "1",
-            "outro": "Visit www.myconfessions.co.za to anonymously confess",
+            "outro": "Visit confess.coraxi.com to anonymously confess",
             "text": "extracted and cleaned confession text"
         },
         ...
@@ -323,7 +321,7 @@ async def process_images(images: List[UploadFile] = File(...)):
         
         # Standard values for video generation
         series = "Confessions"
-        outro = "Visit www.myconfessions.co.za to anonymously confess"
+        outro = "Visit confess.coraxi.com to anonymously confess"
         
         for idx, image in enumerate(images, start=1):
             # Validate image type
