@@ -47,6 +47,10 @@ class APIKeyMiddleware(BaseHTTPMiddleware):
         if request.url.path == "/health":
             return await call_next(request)
         
+        # Skip authentication for CORS preflight requests
+        if request.method == "OPTIONS":
+            return await call_next(request)
+        
         # Get API key from environment
         valid_api_key = env.get('API_KEY')
         
