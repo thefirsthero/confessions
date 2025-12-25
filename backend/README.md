@@ -2,17 +2,57 @@ My server for text extraction and cleaning from images for my WhisperConfesssion
 
 # Before you start
 
-I recommend working with a virtual environment:
+This project uses **uv** for fast, reliable Python package management.
 
-```
-python -m venv venv
-.\venv\Scripts\activate
+### Install uv (if not already installed)
+
+**Windows (PowerShell):**
+
+```powershell
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
 ```
 
-### First, install the necessary dependencies 🖥
+**Or via scoop:**
 
+```powershell
+scoop install uv
 ```
-pip install -r requirement.txt
+
+**macOS/Linux:**
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+### Create virtual environment and install dependencies 🖥
+
+```bash
+uv venv
+.venv\Scripts\activate  # Windows
+source .venv/bin/activate  # macOS/Linux
+uv sync
+```
+
+## UV Package Management Commands
+
+```bash
+# Add a new package
+uv add package-name
+
+# Remove a package
+uv remove package-name
+
+# Install dependencies from pyproject.toml
+uv sync
+
+# Update lock file
+uv lock
+
+# Quick install without updating pyproject.toml
+uv pip install package-name
+
+# List installed packages
+uv pip list
 ```
 
 ### Then setup .env files:

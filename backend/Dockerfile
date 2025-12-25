@@ -1,15 +1,24 @@
-FROM python:3.8-slim
+FROM python:3.11-slim
 
-# Install system dependencies
+# Install system dependencies and uv
 RUN apt-get update \
-  && apt-get -y install tesseract-ocr \
+  && apt-get -y install tesseract-ocr curl \
   && apt-get clean \
-  && rm -rf /var/lib/apt/lists/*
+  && rm -rf /var/lib/apt/lists/* \
+  && curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Add uv to PATH
+ENV PATH="/root/.local/bin:$PATH"
 
 WORKDIR /app
 
+# Copy project files
+COPY pyproject.toml uv.lock ./
+
+# Install dependencies using uv
+RUN uv sync --frozen --no-dev
+
+# Copy the rest of the application
 COPY . /app
 
-RUN pip install --no-cache-dir -r requirements.txt
-
-CMD ["uvicorn", "main:app", "--host=0.0.0.0", "--port=8000"]
+CMD ["uv", "run", "uvicorn", "main:app", "--host=0.0.0.0", "--port=8000"]
