@@ -15,10 +15,13 @@ function Feed() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const apiUrl = `${appConfig.apiUrl}/`;
+    const apiUrl = `${appConfig.apiUrl}/confessions`;
+    const apiKey = import.meta.env.VITE_API_KEY;
 
     axios
-      .get(apiUrl)
+      .get(apiUrl, {
+        headers: apiKey ? { "X-API-Key": apiKey } : {},
+      })
       .then((response) => {
         const confessionsArray: Confession[] = Object.values(
           response.data,

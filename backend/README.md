@@ -47,6 +47,9 @@ Copy `.env.template` to `.env` and configure:
 # CORS allowed origins (comma-separated)
 CORS_ORIGINS=http://localhost:3000,http://localhost:5173
 
+# API Security (generate with: python -c "import secrets; print(secrets.token_urlsafe(32))")
+API_KEY=your-secure-api-key-here
+
 # PostgreSQL Database
 DATABASE_URL=postgresql://username:password@localhost:5432/confessions_db
 DB_SCHEMA=confessions
@@ -55,6 +58,12 @@ DATABASE_SSL=false
 # Self-ping (optional - for keeping server alive)
 SELF_PING_ENABLED=false
 HEALTHCHECK_URL=http://127.0.0.1:8000/health
+```
+
+**Generate a secure API key:**
+
+```bash
+python -c "import secrets; print(secrets.token_urlsafe(32))"
 ```
 
 ### 4. Setup PostgreSQL Database
@@ -119,22 +128,55 @@ docker run -p 8000:8000 --env-file .env confessions-api
 
 ## API Endpoints
 
+All endpoints (except `/health`) require an API key in the `X-API-Key` header for authentication.
+
 ### Confessions
 
-- **GET** `/` - Get all confessions from database
-- **POST** `/addConfession` - Add a new confession
+- **GET** `/confessions` - Get all confessions from database
+
+  - Headers: `X-API-Key: your-api-key`
+  - Response: Dictionary of confessions with cleaned text
+
+- **POST** `/confessions` - Add a new confession
+  - Headers: `X-API-Key: your-api-key`
   - Request Body: `{ "confession": "string", "location": "string" }`
   - Response: `{ "status": 200, "message": "...", "data": {...} }`
 
-### Export
+### Export & Processing
 
-- **GET** `/myconfessions-json/` - Generate and download MyConfessions.json file
+- **GET** `/confessions/export` - Generate and download MyConfessions.json file
+
+  - Headers: `X-API-Key: your-api-key`
   - Returns formatted JSON file for content generation
+
+- **POST** `/images/process` - Process images with OCR
+  - Headers: `X-API-Key: your-api-key`
+  - Request: Multipart form data with image files
+  - Response: Array of processed confessions with text, series, and part numbers
 
 ### Health Check
 
-- **GET** `/health` - API health status
+- **GET** `/health` - API health status (no authentication required)
   - Response: `{ "status": "ok" }`
+
+## Security
+
+The API uses **API Key authentication** to prevent unauthorized access:
+
+1. **API Key Middleware**: All endpoints (except `/health`) require a valid API key
+2. **Header-based**: API key must be sent in `X-API-Key` header
+3. **CORS Protection**: Only configured origins can make browser requests
+4. **Environment-based**: API key stored securely in `.env` file
+
+**Example authenticated request:**
+
+```bash
+curl -H "X-API-Key: your-api-key" http://127.0.0.1:8000/confessions
+```
+
+**Frontend configuration:**
+
+Add `VITE_API_KEY` to your frontend `.env` file and include it in all API requests.
 
 ## Project Structure
 

@@ -22,16 +22,23 @@ function Post() {
     setUploadSuccess(null);
 
     // Append the specific endpoint
-    const apiUrl = `${appConfig.apiUrl}/addConfession`;
+    const apiUrl = `${appConfig.apiUrl}/confessions`;
+    const apiKey = import.meta.env.VITE_API_KEY;
 
     try {
       setIsUploading(true);
 
-      const response = await axios.post(apiUrl, {
-        id: -1,
-        confession: String(confession),
-        location: String(city),
-      });
+      const response = await axios.post(
+        apiUrl,
+        {
+          id: -1,
+          confession: String(confession),
+          location: String(city),
+        },
+        {
+          headers: apiKey ? { "X-API-Key": apiKey } : {},
+        },
+      );
 
       // Handle success, reset form, and display success message
       console.log("Submission successful", response);

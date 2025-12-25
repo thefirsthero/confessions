@@ -1,15 +1,16 @@
 """
-Test script for /process-images/ endpoint
+Test script for /images/process endpoint
 This script tests the image processing endpoint with a sample image.
 """
 import requests
 import sys
+import os
 
 # API endpoint
-API_URL = "http://127.0.0.1:8000/process-images/"
+API_URL = "http://127.0.0.1:8000/images/process"
 
 def test_process_images():
-    """Test the process-images endpoint with sample images"""
+    """Test the images/process endpoint with sample images"""
     
     # Check if image paths are provided
     if len(sys.argv) < 2:
@@ -32,10 +33,14 @@ def test_process_images():
             print(f"Error reading '{path}': {e}")
             return
     
+    # Get API key from environment
+    api_key = os.getenv('API_KEY')
+    headers = {'X-API-Key': api_key} if api_key else {}
+    
     try:
         # Send POST request
         print(f"Sending {len(files)} image(s) to {API_URL}...")
-        response = requests.post(API_URL, files=files)
+        response = requests.post(API_URL, files=files, headers=headers)
         
         # Check response
         if response.status_code == 200:

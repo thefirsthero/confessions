@@ -2,13 +2,13 @@ import datetime
 import time
 import uuid
 from src.connection import get_pool, query, fetchrow, execute, close_pool
-from fastapi import FastAPI, File, UploadFile, HTTPException
+from fastapi import FastAPI, File, UploadFile, HTTPException, Request, Header
 from fastapi.responses import FileResponse, JSONResponse
 import requests
 import uvicorn
 import os
 import json
-from typing import List
+from typing import List, Optional
 import imghdr 
 from src.image_processing import extract_and_reformat_text
 from src.text_processing import filter_text, clean_and_format_text, extract_series_and_part, split_and_clean_text
@@ -21,6 +21,8 @@ import asyncio
 import anyio
 import cv2
 import numpy as np
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.responses import Response
 
 # Create an instance of FastAPI to handle routes
 app = FastAPI()
@@ -37,6 +39,36 @@ app.add_middleware(
     allow_headers=["*"],
     allow_credentials=True,
 )
+
+# API Key Authentication Middleware
+class APIKeyMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        # Skip authentication for health check endpoint
+        if request.url.path == "/health":
+            return await call_next(request)
+        
+        # Get API key from environment
+        valid_api_key = env.get('API_KEY')
+        
+        # If no API key is configured, allow all requests (development mode)
+        if not valid_api_key:
+            return await call_next(request)
+        
+        # Get API key from request header
+        api_key = request.headers.get('X-API-Key')
+        
+        # Verify API key
+        if not api_key or api_key != valid_api_key:
+            return Response(
+                content=json.dumps({"detail": "Invalid or missing API key"}),
+                status_code=401,
+                media_type="application/json"
+            )
+        
+        return await call_next(request)
+
+# Add API key middleware
+app.add_middleware(APIKeyMiddleware)
 
 # Self-ping functionality to keep the server alive
 def ping_server():
@@ -85,9 +117,9 @@ def clean_confession_text(text: str) -> str:
     cleaned = ' '.join(cleaned.split())
     return cleaned
 
-# Define the behavior for the http://127.0.0.1:8000/ route with the GET method
-@app.get("/")
-async def root():
+# Get all confessions
+@app.get("/confessions")
+async def get_confessions():
     """Get all confessions from the database"""
     try:
         # Query all confessions from PostgreSQL
@@ -113,9 +145,9 @@ async def root():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# Define the behavior for the http://127.0.0.1:8000/addConfession route with the POST method
-@app.post("/addConfession")
-async def addConfession(confession_obj: ConfessionCreate): 
+# Create a new confession
+@app.post("/confessions")
+async def create_confession(confession_obj: ConfessionCreate): 
     """Add a new confession to the database"""
     try:
         # Insert confession into PostgreSQL
@@ -141,9 +173,9 @@ async def addConfession(confession_obj: ConfessionCreate):
 
 # Image processing endpoints removed - will be handled locally in admin site
 
-# API endpoint to generate a MyConfessions.json for www.myconfessions.co.za confessions
-@app.get("/myconfessions-json/")
-async def myconfessions_json():
+# Export confessions as JSON file
+@app.get("/confessions/export")
+async def export_confessions():
     """Generate MyConfessions.json from PostgreSQL database"""
     try:
         # Query all confessions from PostgreSQL ordered by id
@@ -206,8 +238,8 @@ async def myconfessions_json():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# API endpoint to process images and generate video.json
-@app.post("/process-images/")
+# Process images with OCR
+@app.post("/images/process")
 async def process_images(images: List[UploadFile] = File(...)):
     """
     Process uploaded images with OCR and generate video.json structure.
