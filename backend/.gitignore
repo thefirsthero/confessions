@@ -1,11 +1,18 @@
-serviceAccountKey.json
-# Byte-compiled / optimized / DLL files
+# Environment variables
+.env
+.env.*
+!.env.template
+
+# Python cache
 __pycache__/
 *.py[cod]
 *$py.class
-
-# C extensions
 *.so
+
+# Virtual environment
+.venv/
+venv/
+ENV/
 
 # Distribution / packaging
 .Python

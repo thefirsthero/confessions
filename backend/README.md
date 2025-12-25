@@ -1,10 +1,18 @@
-My server for text extraction and cleaning from images for my WhisperConfesssions project
+# Confessions Backend API
 
-# Before you start
+FastAPI backend for the Confessions application with PostgreSQL database and OCR text processing capabilities.
 
-This project uses **uv** for fast, reliable Python package management.
+## Tech Stack
 
-### Install uv (if not already installed)
+- **FastAPI** - Modern Python web framework
+- **PostgreSQL** - Primary database (via asyncpg)
+- **uv** - Fast Python package manager
+- **Tesseract OCR** - Text extraction from images
+- **OpenCV** - Image processing
+
+## Quick Start
+
+### 1. Install uv (if not already installed)
 
 **Windows (PowerShell):**
 
@@ -24,18 +32,62 @@ scoop install uv
 curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
-### Install dependencies 🖥
+### 2. Install dependencies
 
 ```bash
 # Creates .venv and installs all dependencies
 uv sync
-
-# Activate the virtual environment (optional, for interactive shell use)
-.venv\Scripts\activate  # Windows
-source .venv/bin/activate  # macOS/Linux
 ```
 
-## UV Package Management Commands
+### 3. Setup environment
+
+Copy `.env.template` to `.env` and configure:
+
+```bash
+# Frontend URLs
+FRONTEND_URL=http://localhost:3000
+FRONTEND_URL_2=http://localhost:3000
+
+# PostgreSQL Database
+DATABASE_URL=postgresql://username:password@localhost:5432/confessions_db
+DB_SCHEMA=confessions
+DATABASE_SSL=false
+
+# Self-ping (optional - for keeping server alive)
+SELF_PING_ENABLED=false
+HEALTHCHECK_URL=http://127.0.0.1:8000/health
+```
+
+### 4. Setup PostgreSQL Database
+
+**Create the schema and tables:**
+
+```bash
+uv run --env-file .env python db/migrate.py
+```
+
+**Optional - Migrate data from Firebase:**
+
+```bash
+# Requires: uv pip install firebase-admin
+# And FIREBASE_SERVICE_ACCOUNT_JSON_B64 in .env
+uv run --env-file .env python db/migrate_from_firebase.py
+```
+
+### 5. Run the API
+
+```bash
+# Development mode with hot reload
+uv run --env-file .env uvicorn main:app --reload
+```
+
+Access the API at:
+
+- **API Root**: http://127.0.0.1:8000/
+- **Swagger UI**: http://127.0.0.1:8000/docs
+- **ReDoc**: http://127.0.0.1:8000/redoc
+
+## UV Package Management
 
 ```bash
 # Add a new package
@@ -44,87 +96,79 @@ uv add package-name
 # Remove a package
 uv remove package-name
 
-# Install dependencies from pyproject.toml
+# Sync dependencies
 uv sync
 
 # Update lock file
 uv lock
 
-# Quick install without updating pyproject.toml
-uv pip install package-name
-
 # List installed packages
 uv pip list
 ```
 
-### Then setup .env files:
+## Docker Deployment
 
-These files will host the allowed frontend url's for each environment.
+Build and run with Docker:
 
-They will look like:
+```bash
+# Build image
+docker build -t confessions-api .
 
-```
-FRONTEND_URL=http://localhost:3000
-FRONTEND_URL_2=http://localhost:3000
-FIREBASE_SERVICE_ACCOUNT_JSON_B64={BASE_64_ENCODED_FIREBASE_SERVICE_ACCOUNT_JSON}
-```
-
-### To use this REST API, you need to download Firebase credentials from your Firebase console 🤓
-
-To do this process:
-
-- Go to Firebase 🌎
-- Create a new project 🚀
-- Create a Firestore database in production or test mode
-- In the project, select > Project Settings > Service accounts > python 🐍
-- Select "Generate new private key" 🔑
-- Add the generated file to the root of the REST API 📩
-- Rename the file to "serviceAccountKey.json" 📄
-
-With this, you can now run your REST API using the command 🖥
-
-```
-uvicorn main:app --reload
+# Run container
+docker run -p 8000:8000 --env-file .env confessions-api
 ```
 
-# OR
+## API Endpoints
 
-### Use Docker (Testing):
+### Confessions
 
-Run: `docker compose -f docker-compose.development.yaml up --build` to build and run app in development environment (1st time)
-or use `docker compose -f docker-compose.development.yaml` to run if already built
+- **GET** `/` - Get all confessions from database
+- **POST** `/addConfession` - Add a new confession
+  - Request Body: `{ "confession": "string", "location": "string" }`
+  - Response: `{ "status": 200, "message": "...", "data": {...} }`
 
-NB: There is a docket cheatsheet in the root `backend` directory
-NB: Run: `docker compose -f docker-compose.production.yaml up --build -d` to build and run production app in detached mode (1st time)
+### Export
 
-### To Build Docker Image and Push to Dockerhub (Deployment):
+- **GET** `/myconfessions-json/` - Generate and download MyConfessions.json file
+  - Returns formatted JSON file for content generation
 
-Run `docker build -t thefirsthero/confessions-fast-api-server:1.0.0 .` (build)
-Run `docker push thefirsthero/confessions-fast-api-server1.0.0` (push)
+### Health Check
 
-## End-points
+- **GET** `/health` - API health status
+  - Response: `{ "status": "ok" }`
 
-The URL http://127.0.0.1:8000/docs will render the interactive documentation of FastAPI, where you can test the endpoints you create, as well as the ones already added by default.
+## Project Structure
 
-The URL http://127.0.0.1:8000/ will return a json of all confessions currently present in the confessions collection on the firebase firestore.
+```
+backend/
+├── db/
+│   ├── schema.sql              # PostgreSQL schema definition
+│   └── migrate.py              # Create database tables
+├── src/
+│   ├── connection.py           # Database connection pool
+│   ├── models.py               # Pydantic models
+│   ├── image_processing.py     # OCR image processing
+│   ├── text_processing.py      # Text cleaning utilities
+│   └── ocr_functions.py        # Tesseract OCR wrapper
+├── main.py                     # FastAPI application
+├── pyproject.toml              # Project dependencies
+├── uv.lock                     # Locked dependencies
+├── Dockerfile                  # Docker configuration
+├── .env.template               # Environment template
+└── README.md                   # This file
+```
 
-The URL http://127.0.0.1:8000/addConfession allows you to post a confession to the confessions collection on the firebase firestore.
+## Development
 
-The URL http://127.0.0.1:8000/upload-images/ allows you to upload images to the server memory using the POST method.
+The API uses:
 
-The URL http://127.0.0.1:8000/list-images/ will return a complete list of all images currently on the server.
+- **Async PostgreSQL** connection pooling for performance
+- **Pydantic** models for request/response validation
+- **CORS** middleware for frontend integration
+- **Health check** endpoint for monitoring
 
-The URL http://127.0.0.1:8000//process-images/ will run through and process each image uploaded to the server, extracting its text via ocr, cleaning that text and running the text through a profanity filter, and at the end of the processing, return a json file, with the results of the processing.
+## Notes
 
-The URL http://127.0.0.1:8000/delete-images/ allows you to delete all images currently on the server.
-
-The URL http://127.0.0.1:8000/delete-image/{filename} allows you to delete {filename} from the server.
-
-The URL http://127.0.0.1:8000/healthcheck allows you to check the health of the API.
-
-- [Firebase documentation](https://firebase.google.com/docs?authuser=0&hl=es)
-- [FastAPI documentation](https://fastapi.tiangolo.com/tutorial/)
-
-### Docker Tutorial Videos that aided in this Project:
-
-Found in`./docker_tutorial`
+- Image processing endpoints removed - will be handled in admin frontend
+- Firebase dependencies removed in favor of PostgreSQL
+- Uses uv for faster dependency management
