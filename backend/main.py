@@ -23,21 +23,17 @@ import anyio
 # Create an instance of FastAPI to handle routes
 app = FastAPI()
 
-'''The below section allows specific ip addresses to make requests'''
-# Get allowed servers from env file
-frontend_url = env['FRONTEND_URL']
-frontend_url_2 = env['FRONTEND_URL_2']
+# Parse CORS origins from environment variable
+allowed_origins = env.get('CORS_ORIGINS', 'http://localhost:3000').split(',')
+allowed_origins = [origin.strip() for origin in allowed_origins]  # Remove whitespace
 
-# Configure CORS to allow requests from your React app's origins
-origins = [
-    frontend_url,
-    frontend_url_2
-]
+# Configure CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins, # Add your React app's origin(s) here
-    allow_methods=["*"],  # Allow all methods (GET, POST, etc.)
-    allow_headers=["*"],  # Allow all headers
+    allow_origins=allowed_origins,
+    allow_methods=["*"],
+    allow_headers=["*"],
+    allow_credentials=True,
 )
 
 # Self-ping functionality to keep the server alive

@@ -44,9 +44,8 @@ uv sync
 Copy `.env.template` to `.env` and configure:
 
 ```bash
-# Frontend URLs
-FRONTEND_URL=http://localhost:3000
-FRONTEND_URL_2=http://localhost:3000
+# CORS allowed origins (comma-separated)
+CORS_ORIGINS=http://localhost:3000,http://localhost:5173
 
 # PostgreSQL Database
 DATABASE_URL=postgresql://username:password@localhost:5432/confessions_db
