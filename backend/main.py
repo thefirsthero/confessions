@@ -73,6 +73,16 @@ async def shutdown_event():
     await close_pool()
     print("✅ Database connection pool closed")
 
+def clean_confession_text(text: str) -> str:
+    """Clean confession text by replacing newlines with spaces and removing extra whitespace"""
+    if not text:
+        return text
+    # Replace newline characters with spaces
+    cleaned = text.replace('\n', ' ')
+    # Replace multiple spaces with single space
+    cleaned = ' '.join(cleaned.split())
+    return cleaned
+
 # Define the behavior for the http://127.0.0.1:8000/ route with the GET method
 @app.get("/")
 async def root():
@@ -85,11 +95,11 @@ async def root():
             ORDER BY id ASC
         """)
         
-        # Convert to dictionary format
+        # Convert to dictionary format with cleaned text
         confessions_dict = {
             str(row['id']): {
                 'id': row['id'],
-                'confession': row['confession'],
+                'confession': clean_confession_text(row['confession']),
                 'location': row['location'],
                 'created_at': row['created_at'].isoformat() if row['created_at'] else None,
                 'updated_at': row['updated_at'].isoformat() if row['updated_at'] else None
@@ -118,7 +128,7 @@ async def addConfession(confession_obj: ConfessionCreate):
             'message': 'Confession added successfully',
             'data': {
                 'id': row['id'],
-                'confession': row['confession'],
+                'confession': clean_confession_text(row['confession']),
                 'location': row['location'],
                 'created_at': row['created_at'].isoformat(),
                 'updated_at': row['updated_at'].isoformat()
@@ -160,7 +170,8 @@ async def myconfessions_json():
 
         for row in rows:
             confession_id = row['id']
-            confession_text = row['confession'].strip()
+            # Clean the confession text
+            confession_text = clean_confession_text(row['confession'])
             location = row['location']
 
             # Append 'location' to the text with proper punctuation
