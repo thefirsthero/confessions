@@ -21,4 +21,5 @@ RUN uv sync --frozen --no-dev
 # Copy the rest of the application
 COPY . /app
 
-CMD ["uv", "run", "uvicorn", "main:app", "--host=0.0.0.0", "--port=8000"]
+# Use shell form to allow environment variable substitution
+CMD uv run uvicorn main:app --host=0.0.0.0 --port=${PORT:-8000}

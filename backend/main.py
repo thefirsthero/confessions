@@ -98,25 +98,15 @@ async def run_scheduler():
 
 @app.on_event("startup")
 async def startup_event():
-    # Initialize database connection pool in background to not block startup
-    asyncio.create_task(init_database())
+    # Initialize database connection pool
+    await get_pool()
+    print("✅ Database connection pool initialized")
     
     if env.get('SELF_PING_ENABLED', 'false').lower() == 'true':
         print("Self-ping enabled. Starting scheduler.")
         asyncio.create_task(run_scheduler())
     else:
         print("Self-ping disabled.")
-
-async def init_database():
-    """Initialize database connection pool"""
-    try:
-        await get_pool()
-        print("✅ Database connection pool initialized")
-    except Exception as e:
-        print(f"❌ Failed to initialize database: {e}")
-        # Retry after delay
-        await asyncio.sleep(5)
-        await init_database()
 
 @app.on_event("shutdown")
 async def shutdown_event():
