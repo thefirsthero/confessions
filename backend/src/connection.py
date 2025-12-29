@@ -24,7 +24,6 @@ async def get_pool() -> asyncpg.Pool:
             min_size=5,
             max_size=20,
             command_timeout=60,
-            statement_cache_size=0,  # Disable statement caching for Neon pooler compatibility
             init=init_connection
         )
     
